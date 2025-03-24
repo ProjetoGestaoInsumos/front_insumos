@@ -1,16 +1,16 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class ApiService {
-  final String baseUrl = "https://meu-backend-production.up.railway.app";
+  final Dio _dio = Dio();
+  final String baseUrl = "https://exemplo.onrender.com";
 
-  Future<List<dynamic>> fetchUsers() async {
-    final response = await http.get(Uri.parse('$baseUrl/users'));
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Erro ao buscar usuários');
+  Future<List<dynamic>> fetchProdutos() async {
+    try {
+      final response = await _dio.get("$baseUrl/items/");
+      return response.data;
+    } catch (e) {
+      print("Erro ao buscar produtos: $e");
+      return [];
     }
   }
 }
