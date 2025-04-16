@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/api/api_service.dart';
 
-class ItemsPage extends StatefulWidget {
+class ItemsTestPage extends StatefulWidget {
   @override
   _ProdutosPageState createState() => _ProdutosPageState();
 }
 
-class _ProdutosPageState extends State<ItemsPage> {
+class _ProdutosPageState extends State<ItemsTestPage> {
   final ApiService apiService = ApiService();
   List produtos = [];
 

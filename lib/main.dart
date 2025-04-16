@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:front_insumos/screens/items_page.dart';
+import 'package:front_insumos/layouts/main_layout.dart';
+import 'package:front_insumos/screens/home_page.dart';
+import 'package:front_insumos/screens/items_test_page.dart';
+import 'package:front_insumos/utils/colors.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,34 +13,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Meu App',
+      title: 'Gestão de Insumos',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        fontFamily: 'Poppins',
+        colorScheme: ColorScheme.fromSwatch()
+            .copyWith(primary: CustomColors.blue, secondary: CustomColors.grey),
       ),
       initialRoute: '/', // Rota inicial
       routes: {
         '/': (context) => HomePage(),
         '/produtos': (context) =>
-            ItemsPage(), // Rota para a página de produtos
+            ItemsTestPage(), // Rota para a página de produtos
+        '/layout': (context) => MainLayout(), // Rota para o layout
       },
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Home")),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(
-                context, '/produtos'); // Navega para ProdutosPage
-          },
-          child: Text("Ver Produtos"),
-        ),
-      ),
     );
   }
 }
