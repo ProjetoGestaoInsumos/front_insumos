@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_insumos/components/custom_popup.dart';
 
 class Sidebar extends StatelessWidget {
   final Function(int) onItemSelected;
@@ -36,7 +37,14 @@ class Sidebar extends StatelessWidget {
                 for (int i = 0; i < items.length; i++)
                   ListTile(
                     leading: Icon(icons[i]),
-                    title: isCompact ? null : Text(items[i]),
+                    title: isCompact
+                        ? null
+                        : Text(
+                            items[i],
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
                     selected: selectedIndex == i,
                     onTap: () => onItemSelected(i),
                   ),
@@ -50,12 +58,48 @@ class Sidebar extends StatelessWidget {
               children: [
                 ListTile(
                   leading: Icon(Icons.settings_outlined),
-                  title: isCompact ? null : Text("Configuração"),
-                  onTap: () {},
+                  title: isCompact
+                      ? null
+                      : Text(
+                          "Configuração",
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                  onTap: () {
+                    CustomPopup.show(
+                      context: context,
+                      title: "Configuração",
+                      content: Text("Configuração do sistema"),
+                      onClose: () => Navigator.of(context).pop(),
+                      showFooter: true,
+                      primaryButtonLabel: "Salvar",
+                      primaryButtonOnPressed: () async {
+                        // Simula um atraso de 2 segundos
+                        await Future.delayed(const Duration(seconds: 2));
+                        // Fecha o popup após o atraso
+                        Navigator.of(context).pop();
+                      },
+                      secondaryButtonLabel: "Cancelar",
+                      secondaryButtonOnPressed: () async {
+                        // Simula um atraso de 2 segundos
+                        await Future.delayed(const Duration(seconds: 2));
+                        // Fecha o popup após o atraso
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.logout_outlined),
-                  title: isCompact ? null : Text("Sair"),
+                  title: isCompact
+                      ? null
+                      : Text(
+                          "Sair",
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
                   onTap: () {},
                 ),
               ],

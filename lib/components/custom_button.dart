@@ -47,104 +47,54 @@ class _CustomIconButtonState extends State<CustomButton> {
   Widget build(BuildContext context) {
     final textColor =
         widget.buttonColor == CustomColors.blue ? Colors.white : Colors.black;
-    if (widget.text != null) {
-      return ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(
-            widget.buttonColor ?? Colors.grey,
-          ),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),
-            ),
+
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(
+          widget.buttonColor ?? Colors.grey,
+        ),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 8),
           ),
         ),
-        onPressed: isLoading ? null : _handlePress,
-        child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.text!,
-                    style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: widget.fontSize ?? 14),
+      ),
+      onPressed: isLoading ? null : _handlePress,
+      child: SizedBox(
+        height: 40,
+        child: Center(
+          child: isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 2,
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    widget.iconData,
-                    color: widget.iconColor ?? Colors.white,
-                  ),
-                ],
-              ),
-      );
-    } else if (widget.text != null && widget.iconData != null) {
-      return ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor:
-              WidgetStatePropertyAll(widget.buttonColor ?? Colors.grey),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),
-            ),
-          ),
-        ),
-        onPressed: isLoading ? null : _handlePress,
-        child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.iconData != null)
+                      Icon(
+                        widget.iconData,
+                        color: widget.iconColor ?? Colors.white,
+                      ),
+                    if (widget.text != null) ...[
+                      if (widget.iconData != null) const SizedBox(width: 8),
+                      Text(
+                        widget.text!,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: widget.fontSize ?? 16,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              )
-            : Text(
-                widget.text!,
-                style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: widget.fontSize ?? 14),
-              ),
-      );
-    } else {
-      return ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(
-            widget.buttonColor ?? Colors.grey,
-          ),
-          padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),
-            ),
-          ),
         ),
-        onPressed: isLoading ? null : _handlePress,
-        child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Icon(
-                widget.iconData,
-                color: widget.iconColor ?? Colors.blue,
-              ),
-      );
-    }
+      ),
+    );
   }
 }
