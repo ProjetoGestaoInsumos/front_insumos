@@ -9,6 +9,7 @@ class CustomButton extends StatefulWidget {
   final Color? iconColor;
   final double? borderRadius;
   final double? fontSize;
+  final double? minWidth; // NOVO
 
   const CustomButton({
     super.key,
@@ -19,6 +20,7 @@ class CustomButton extends StatefulWidget {
     this.iconColor,
     this.borderRadius,
     this.fontSize,
+    this.minWidth, // NOVO: largura mínima padrão
   });
   @override
   State<CustomButton> createState() => _CustomIconButtonState();
@@ -62,6 +64,7 @@ class _CustomIconButtonState extends State<CustomButton> {
       onPressed: isLoading ? null : _handlePress,
       child: SizedBox(
         height: 40,
+        width: widget.minWidth, // largura mínima
         child: Center(
           child: isLoading
               ? const SizedBox(
