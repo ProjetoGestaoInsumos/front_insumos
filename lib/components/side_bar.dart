@@ -55,8 +55,8 @@ class _SidebarState extends State<Sidebar> {
                   iconColor = CustomColors.blue;
                   textColor = CustomColors.blue;
                 } else if (isHovered) {
-                  iconColor = CustomColors.blue;
-                  textColor = CustomColors.blue;
+                  iconColor = Colors.black;
+                  textColor = Colors.black;
                 } else {
                   iconColor = Colors.black;
                   textColor = Colors.black;
@@ -73,7 +73,7 @@ class _SidebarState extends State<Sidebar> {
                           horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color:
-                            isSelected ? Colors.grey[300] : Colors.transparent,
+                            (isSelected || isHovered) ? Colors.grey[300] : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -147,8 +147,8 @@ class _SidebarState extends State<Sidebar> {
     required int hoverKey,
   }) {
     final bool isHovered = _hoveredIndex == hoverKey;
-    Color iconColor = isHovered ? CustomColors.blue : Colors.black;
-    Color textColor = isHovered ? CustomColors.blue : Colors.black;
+    Color iconColor = isHovered ? Colors.black : Colors.black;
+    Color textColor = isHovered ? Colors.black : Colors.black;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hoveredIndex = hoverKey),
@@ -157,6 +157,10 @@ class _SidebarState extends State<Sidebar> {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: isHovered ? Colors.grey[300] : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Row(
             children: [
               Icon(icon, color: iconColor),

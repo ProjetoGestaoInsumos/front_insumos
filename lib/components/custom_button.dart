@@ -52,9 +52,19 @@ class _CustomIconButtonState extends State<CustomButton> {
 
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(
-          widget.buttonColor ?? Colors.grey,
-        ),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          final baseColor = widget.buttonColor ?? Colors.grey;
+
+          if (states.contains(WidgetState.hovered)) {
+            if (baseColor == CustomColors.blue) {
+              return CustomColors.blue.withOpacity(0.85);
+            } else {
+              return baseColor.withOpacity(0.9);
+            }
+          }
+
+          return baseColor; // padrão
+        }),
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 8),
