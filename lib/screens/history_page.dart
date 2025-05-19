@@ -104,7 +104,7 @@ class HistoryPageContent extends StatelessWidget {
             ),
           ),
 
-          // Aqui você pode adicionar a lista de movimentações depois
+          // Adicionar a lista de movimentações depois
         ],
       ),
     );
