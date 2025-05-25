@@ -15,67 +15,45 @@ class HistoryPage extends StatefulWidget {
 class _HistoryLayoutState extends State<HistoryPage> {
   int selectedPage = 2;
 
-  final List<Widget> pages = [
-    HomePage(),
-    HomePage(),
-    HistoryPageContent(),
-    HomePage(),
-    HomePage(),
-  ];
+  late final List<Widget> pages;
+
+  @override
+  void initState() {
+    super.initState();
+    pages = [
+      const HomePage(),
+      const HomePage(),
+      const HistoryPageContent(),
+      const HomePage(),
+      const HomePage(),
+    ];
+  }
 
   void onItemSelected(int index) {
     setState(() {
       selectedPage = index;
     });
-    Navigator.of(context).pop(); // Fecha o drawer no mobile
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isDesktop = constraints.maxWidth >= 800;
-
-        return Scaffold(
-          appBar: isDesktop
-              ? null
-              : AppBar(
-                  title: const Text("Histórico"),
-                  leading: Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    ),
-                  ),
-                ),
-          drawer: isDesktop
-              ? null
-              : Drawer(
-                  child: Sidebar(
-                    selectedIndex: selectedPage,
-                    onItemSelected: onItemSelected,
-                  ),
-                ),
-          body: isDesktop
-              ? Row(
-                  children: [
-                    Sidebar(
-                      selectedIndex: selectedPage,
-                      onItemSelected: onItemSelected,
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          const TopBar(),
-                          Expanded(child: pages[selectedPage]),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : pages[selectedPage],
-        );
-      },
+    return Scaffold(
+      body: Row(
+        children: [
+          Sidebar(
+            selectedIndex: selectedPage,
+            onItemSelected: onItemSelected,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                const TopBar(),
+                Expanded(child: pages[selectedPage]),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -199,135 +177,127 @@ class _HistoryPageContentState extends State<HistoryPageContent> {
             },
           ),
           const SizedBox(height: 24),
-          Expanded(
-            child: Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: DataTableTheme(
-                  data: DataTableThemeData(
-                  headingRowColor:
-                     WidgetStateProperty.all(Colors.grey[200]),
-
-                  dataRowMinHeight: 56,
-dataRowMaxHeight: 56,
-
-                  headingRowHeight: 56,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Table(
+              border: const TableBorder(
+                horizontalInside: BorderSide(
+                  color: Color.fromARGB(80, 158, 158, 158),
+                  width: 1,
+                ),
+              ),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE0E0E0),
                   ),
-                  child: DataTable(
-                    border: const TableBorder(
-                      horizontalInside: BorderSide(
-                        color: Color.fromARGB(80, 158, 158, 158),
-                        width: 1,
-                      ),
-                      top: BorderSide.none,
-                      bottom: BorderSide.none,
-                      left: BorderSide.none,
-                      right: BorderSide.none,
-                      verticalInside: BorderSide.none,
-                    ),
-                    columns: [
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('MOVIMENTO')),
+                  children: [
+                    for (final header in [
+                      'MOVIMENTO',
+                      'INGREDIENTE',
+                      'CATEGORIA',
+                      'QUANTIDADE',
+                      'DATA',
+                      'RESPONSÁVEL',
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            header,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('INGREDIENTE')),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('CATEGORIA')),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('QUANTIDADE')),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('DATA')),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: 150,
-                          child: Center(child: Text('RESPONSÁVEL')),
-                        ),
-                      ),
-                    ],
-                    rows: currentPageItems.map((mov) {
-                      bool isEntrada = mov['movimento'] == 'Entrada';
-                      return DataRow(
-                        cells: [
-                          DataCell(Row(
+                  ],
+                ),
+                for (var mov in currentPageItems)
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                isEntrada
+                                mov['movimento'] == 'Entrada'
                                     ? Icons.arrow_upward
                                     : Icons.arrow_downward,
-                                color: isEntrada ? Colors.green : Colors.red,
+                                color: mov['movimento'] == 'Entrada'
+                                    ? Colors.green
+                                    : Colors.red,
                               ),
                               const SizedBox(width: 6),
                               Text(mov['movimento']),
                             ],
-                          )),
-                          DataCell(Text(mov['ingrediente'])),
-                          DataCell(Text(mov['categoria'])),
-                          DataCell(Text(
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: Text(mov['ingrediente'])),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: Text(mov['categoria'])),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
                             mov['quantidade'].toString(),
                             style: TextStyle(
-                              color: isEntrada ? Colors.green : Colors.red,
+                              color: mov['movimento'] == 'Entrada'
+                                  ? Colors.green
+                                  : Colors.red,
                               fontWeight: FontWeight.bold,
                             ),
-                          )),
-                          DataCell(Text(mov['data'])),
-                          const DataCell(Text('Admin')),
-                        ],
-                      );
-                    }).toList(),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: Text(mov['data'])),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: Text('Admin')),
+                      ),
+                    ],
                   ),
-                ),
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
           Align(
             alignment: Alignment.center,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      TextButton.icon(
-                        onPressed: currentPage > 0
-                            ? () => goToPage(currentPage - 1)
-                            : null,
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Anterior'),
-                      ),
-                      ...paginationButtons(),
-                      TextButton.icon(
-                        onPressed: currentPage < totalPages - 1
-                            ? () => goToPage(currentPage + 1)
-                            : null,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Próximo'),
-                      ),
-                    ],
-                  ),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed:
+                      currentPage > 0 ? () => goToPage(currentPage - 1) : null,
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Anterior'),
                 ),
-              ),
+                ...paginationButtons(),
+                TextButton.icon(
+                  onPressed: currentPage < totalPages - 1
+                      ? () => goToPage(currentPage + 1)
+                      : null,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Próximo'),
+                ),
+              ],
             ),
           ),
         ],
