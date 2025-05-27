@@ -1,71 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:front_insumos/components/side_bar.dart';
-import 'package:front_insumos/components/top_bar.dart';
 import 'dart:math';
-import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/components/custom_search_field.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
   @override
-  State<HistoryPage> createState() => _HistoryLayoutState();
+  State<HistoryPage> createState() => _HistoryPageCotentState();
 }
 
-class _HistoryLayoutState extends State<HistoryPage> {
-  int selectedPage = 2;
-
-  late final List<Widget> pages;
-
-  @override
-  void initState() {
-    super.initState();
-    pages = [
-      const HomePage(),
-      const HomePage(),
-      const HistoryPageContent(),
-      const HomePage(),
-      const HomePage(),
-    ];
-  }
-
-  void onItemSelected(int index) {
-    setState(() {
-      selectedPage = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          Sidebar(
-            selectedIndex: selectedPage,
-            onItemSelected: onItemSelected,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                const TopBar(),
-                Expanded(child: pages[selectedPage]),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HistoryPageContent extends StatefulWidget {
-  const HistoryPageContent({super.key});
-
-  @override
-  State<HistoryPageContent> createState() => _HistoryPageContentState();
-}
-
-class _HistoryPageContentState extends State<HistoryPageContent> {
+class _HistoryPageCotentState extends State<HistoryPage> {
   final List<Map<String, dynamic>> movimentacoes = List.generate(105, (index) {
     bool isEntrada = index % 2 == 0;
     return {
