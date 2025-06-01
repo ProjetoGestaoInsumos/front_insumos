@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:front_insumos/utils/colors.dart';
-
 class TopBar extends StatelessWidget {
   const TopBar({super.key});
 

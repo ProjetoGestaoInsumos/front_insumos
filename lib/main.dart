@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', // Rota inicial
       routes: {
-        '/': (context) => HomePage(),
+        '/': (context) => MainLayout(),
         '/produtos': (context) =>
             ItemsTestPage(), // Rota para a página de produtos
         '/layout': (context) => MainLayout(), // Rota para o layout

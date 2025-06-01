@@ -9,6 +9,7 @@ class CustomButton extends StatefulWidget {
   final Color? iconColor;
   final double? borderRadius;
   final double? fontSize;
+  final double? minWidth; // NOVO
 
   const CustomButton({
     super.key,
@@ -19,6 +20,7 @@ class CustomButton extends StatefulWidget {
     this.iconColor,
     this.borderRadius,
     this.fontSize,
+    this.minWidth, // NOVO: largura mínima padrão
   });
   @override
   State<CustomButton> createState() => _CustomIconButtonState();
@@ -50,9 +52,19 @@ class _CustomIconButtonState extends State<CustomButton> {
 
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(
-          widget.buttonColor ?? Colors.grey,
-        ),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          final baseColor = widget.buttonColor ?? Colors.grey;
+
+          if (states.contains(WidgetState.hovered)) {
+            if (baseColor == CustomColors.blue) {
+              return CustomColors.blue.withOpacity(0.85);
+            } else {
+              return baseColor.withOpacity(0.9);
+            }
+          }
+
+          return baseColor; // padrão
+        }),
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 8),
@@ -62,6 +74,7 @@ class _CustomIconButtonState extends State<CustomButton> {
       onPressed: isLoading ? null : _handlePress,
       child: SizedBox(
         height: 40,
+        width: widget.minWidth, // largura mínima
         child: Center(
           child: isLoading
               ? const SizedBox(
