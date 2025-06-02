@@ -38,7 +38,6 @@ class CustomPopup extends StatefulWidget {
   }) {
     return showDialog(
       context: context,
-      barrierDismissible: false, // Impede que o popup feche ao clicar fora
       builder: (BuildContext dialogContext) {
         return CustomPopup(
           title: title,
@@ -131,6 +130,7 @@ class _CustomPopupState extends State<CustomPopup> {
                   if (widget.secondaryButtonLabel != null)
                     Expanded(
                       child: CustomButton(
+                        minWidth: 120,
                         text: widget.secondaryButtonLabel,
                         buttonColor: CustomColors.grey,
                         borderRadius: 10,
@@ -138,10 +138,13 @@ class _CustomPopupState extends State<CustomPopup> {
                         onPressed: widget.secondaryButtonOnPressed,
                       ),
                     ),
-                  if (widget.primaryButtonLabel != null) ...[
+                  if (widget.secondaryButtonLabel != null &&
+                      widget.primaryButtonLabel != null)
                     const SizedBox(width: 50),
+                  if (widget.primaryButtonLabel != null) ...[
                     Expanded(
                       child: CustomButton(
+                        minWidth: 120,
                         text: widget.primaryButtonLabel,
                         buttonColor: isProcessing
                             ? CustomColors.grey

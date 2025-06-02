@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:front_insumos/components/custom_search_field.dart';
+import 'package:front_insumos/components/custom_pagination.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -43,209 +44,202 @@ class _HistoryPageCotentState extends State<HistoryPage> {
     }
   }
 
-  List<Widget> paginationButtons() {
-    List<Widget> buttons = [];
+Widget buildMobileList() {
+  return Expanded(
+    child: ListView.separated(
+      padding: const EdgeInsets.only(bottom: 16),
+      itemCount: currentPageItems.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final mov = currentPageItems[index];
+        return Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      mov['movimento'] == 'Entrada'
+                          ? Icons.arrow_upward
+                          : Icons.arrow_downward,
+                      color: mov['movimento'] == 'Entrada'
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      mov['movimento'],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: mov['movimento'] == 'Entrada'
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text('Ingrediente: ${mov['ingrediente']}'),
+                Text('Categoria: ${mov['categoria']}'),
+                Text('Quantidade: ${mov['quantidade']}'),
+                Text('Data: ${mov['data']}'),
+                const Text('Responsável: Admin'),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
 
-    void addPageButton(int page) {
-      buttons.add(TextButton(
-        onPressed: () => goToPage(page),
-        style: TextButton.styleFrom(
-          backgroundColor:
-              page == currentPage ? Colors.blue : Colors.transparent,
-          foregroundColor: page == currentPage ? Colors.white : Colors.blue,
+  Widget buildDesktopTable(BuildContext context) {
+    return Expanded(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Table(
+            border: const TableBorder(
+              horizontalInside: BorderSide(
+                color: Color.fromARGB(80, 158, 158, 158),
+                width: 1,
+              ),
+            ),
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              TableRow(
+                decoration: const BoxDecoration(color: Color(0xFFE0E0E0)),
+                children: [
+                  for (final header in [
+                    'MOVIMENTO',
+                    'INGREDIENTE',
+                    'CATEGORIA',
+                    'QUANTIDADE',
+                    'DATA',
+                    'RESPONSÁVEL',
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          header,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              for (var mov in currentPageItems)
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              mov['movimento'] == 'Entrada'
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward,
+                              color: mov['movimento'] == 'Entrada'
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(mov['movimento']),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text(mov['ingrediente'])),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text(mov['categoria'])),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          mov['quantidade'].toString(),
+                          style: TextStyle(
+                            color: mov['movimento'] == 'Entrada'
+                                ? Colors.green
+                                : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text(mov['data'])),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text('Admin')),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
-        child: Text((page + 1).toString()),
-      ));
-    }
-
-    if (totalPages <= 7) {
-      for (int i = 0; i < totalPages; i++) {
-        addPageButton(i);
-      }
-    } else {
-      addPageButton(0);
-
-      int startPage = max(1, currentPage - 1);
-      int endPage = min(totalPages - 2, currentPage + 1);
-
-      if (startPage > 1) {
-        buttons.add(const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text("..."),
-        ));
-      }
-
-      for (int i = startPage; i <= endPage; i++) {
-        addPageButton(i);
-      }
-
-      if (endPage < totalPages - 2) {
-        buttons.add(const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text("..."),
-        ));
-      }
-
-      addPageButton(totalPages - 1);
-    }
-
-    return buttons;
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Text(
-              'Histórico de movimentação',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+return Padding(
+  padding: const EdgeInsets.all(16),
+  child: Column(
+    children: [
+      Text(
+        'Histórico de movimentação',
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(height: 8),
-          const Divider(
-            thickness: 2,
-            color: Colors.black,
-          ),
-          const SizedBox(height: 24),
-          CustomSearchField(
-            width: 250,
-            onChanged: (value) {
-              // Atualize seu estado aqui para filtrar a tabela
-            },
-          ),
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Table(
-              border: const TableBorder(
-                horizontalInside: BorderSide(
-                  color: Color.fromARGB(80, 158, 158, 158),
-                  width: 1,
-                ),
-              ),
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                TableRow(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE0E0E0),
-                  ),
-                  children: [
-                    for (final header in [
-                      'MOVIMENTO',
-                      'INGREDIENTE',
-                      'CATEGORIA',
-                      'QUANTIDADE',
-                      'DATA',
-                      'RESPONSÁVEL',
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Text(
-                            header,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                for (var mov in currentPageItems)
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                mov['movimento'] == 'Entrada'
-                                    ? Icons.arrow_upward
-                                    : Icons.arrow_downward,
-                                color: mov['movimento'] == 'Entrada'
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(mov['movimento']),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: Text(mov['ingrediente'])),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: Text(mov['categoria'])),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Text(
-                            mov['quantidade'].toString(),
-                            style: TextStyle(
-                              color: mov['movimento'] == 'Entrada'
-                                  ? Colors.green
-                                  : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: Text(mov['data'])),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: Text('Admin')),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.center,
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                TextButton.icon(
-                  onPressed:
-                      currentPage > 0 ? () => goToPage(currentPage - 1) : null,
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Anterior'),
-                ),
-                ...paginationButtons(),
-                TextButton.icon(
-                  onPressed: currentPage < totalPages - 1
-                      ? () => goToPage(currentPage + 1)
-                      : null,
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Próximo'),
-                ),
-              ],
-            ),
-          ),
-        ],
+        textAlign: TextAlign.center,
       ),
-    );
+      const SizedBox(height: 8),
+      const Divider(thickness: 2, color: Colors.black),
+      const SizedBox(height: 16),
+      Align(
+        alignment: isMobile ? Alignment.center : Alignment.centerLeft,
+        child: CustomSearchField(
+          width: isMobile ? double.infinity : 250,
+          onChanged: (value) {
+            // lógica de busca
+          },
+        ),
+      ),
+      const SizedBox(height: 16),
+      isMobile ? buildMobileList() : buildDesktopTable(context),
+      const SizedBox(height: 16),
+      Align(
+        alignment: Alignment.center,
+        child: CustomPagination(
+          currentPage: currentPage,
+          totalPages: totalPages,
+          onPageChanged: goToPage,
+        ),
+      ),
+    ],
+  ),
+);
+
   }
 }
