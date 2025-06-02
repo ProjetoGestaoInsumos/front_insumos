@@ -35,7 +35,7 @@ class _OrdersPageState extends State<OrdersPage> {
       'Quantidade': '5',
       'Cursos': 'Kg',
       'Detalhes': 'Ver Pedido',
-      'Status': 'Indeferido'
+      'Status': 'INDeferido'
     },
     {
       'Numero': '03',
@@ -77,19 +77,18 @@ class _OrdersPageState extends State<OrdersPage> {
     });
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pendente':
-        return Colors.orange;
-      case 'indeferido':
-        return Colors.red;
-      case 'deferido':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
+  Widget _getStatusIcon(String status) {
+  switch (status.toLowerCase()) {
+    case 'pendente':
+      return const Icon(Icons.pending_outlined, color: Colors.orange, size: 24);
+    case 'indeferido':
+      return const Icon(Icons.close, color: Colors.red, size: 24);
+    case 'deferido':
+      return const Icon(Icons.check, color: Colors.green, size: 24); 
+    default:
+      return const Icon(Icons.help_outline, color: Colors.grey);
   }
-
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,7 +111,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 ),
 
               CustomButton(
-                iconData: Icons.file_open,
+                iconData: Icons.note_add_outlined,
                 text: 'Abrir POP',
                 buttonColor: Color(0xFF4A83A7),
                 onPressed: () async {
@@ -154,35 +153,20 @@ class _OrdersPageState extends State<OrdersPage> {
                       DataCell(Text(order['Quantidade']!)),
                       DataCell(Text(order['Cursos']!)),
                       DataCell(Text(order['Detalhes']!)),
-                      DataCell(Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 10,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _getStatusColor(status),
-                              ),
-                            ),
-                            Text(
-                              status,
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: _getStatusColor(status)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]);
+                      DataCell(Center(child: _getStatusIcon(status)),
+                    )]);
                   }).toList(),
                 ),
               ),
             ),
-        const SizedBox(height: 16),
-         CustomPagination(
-          currentPage: currentPage,
-          totalPages: totalPages,
-          onPageChanged: goToPage,
-        ),
+            Align(
+                    alignment: Alignment.centerRight,
+                    child: CustomPagination(
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    onPageChanged: goToPage,
+                            ),
+                    ),
           ],
         ),
       ),

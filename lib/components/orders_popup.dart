@@ -124,79 +124,76 @@ class OrderPopupContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 850,
-      height: 620,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: _buildTextField("Curso")),
-                const SizedBox(width: 16),
-                Expanded(child: _buildTextField("Docente")),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildTextField("Disciplina"),
-                ),
-                const SizedBox(width: 22),
-                Expanded(
-                  flex: 1,
-                  child: _buildTextField("N de alunos"),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  flex: 1,
-                  child: _buildTextField("N de grupos"),
-                ),
-              ],
-            ),
-
-
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _buildDateField(context)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildDropdown("Turno", ["Manhã", "Tarde", "Noite"])),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _buildDropdown("Protocolo", ["Padrão", "Outro"])),
-                const SizedBox(width: 16),
-                Expanded(child: _buildDropdown("Receita", ["Receita 1", "Receita 2"])),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _buildTextField("Objetivo", maxLines: 5, expand: true),
-            const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: CustomButton(
-              onPressed:() async  {
-                showAddItemPopup(context);
-                return;
-              },
-              iconData: Icons.add,
-              text: "Adicionar Item Extra",
-              buttonColor:Color(0xFF4A83A7),
-              iconColor: Colors.white,
-              borderRadius: 4,
-            ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildTextField("Curso")),
+              const SizedBox(width: 16),
+              Expanded(child: _buildTextField("Docente")),
+            ],
           ),
-            const SizedBox(height: 10),
-            _buildSummaryTable(),
-            const SizedBox(height: 20),
-          ],
-        ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 19,
+                child: _buildTextField("Disciplina"),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 9,
+                child: _buildTextField("Alunos"),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 9,
+                child: _buildTextField("Grupos"),
+              ),
+            ],
+          ),
+    
+    
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _buildDateField(context)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildDropdown("Turno", ["Manhã", "Tarde", "Noite"])),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _buildDropdown("Protocolo", ["Padrão", "Outro"])),
+              const SizedBox(width: 16),
+              Expanded(child: _buildDropdown("Receita", ["Receita 1", "Receita 2"])),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildTextField("Objetivo", height: 80, maxLines: 3, expand: true),
+          const SizedBox(height: 10),
+       Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomButton(
+            onPressed:() async  {
+              showAddItemPopup(context);
+              return;
+            },
+            iconData: Icons.add,
+            text: "Adicionar Item Extra",
+            buttonColor:CustomColors.white,
+            iconColor: Colors.black,
+          ),
+        ],
+      ),
+          const SizedBox(height: 10),
+          _buildSummaryTable(),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -205,8 +202,9 @@ class OrderPopupContent extends StatelessWidget {
   // Widgets Auxiliares
   // ===============================
 
-  static Widget _buildTextField(String label, {int maxLines = 1, bool expand = false}) {
+  static Widget _buildTextField(String label, {double height = 40, int maxLines = 1, bool expand = false}) {
     return SizedBox(
+      height: height,
       width: expand ? double.infinity : 230,
       child: TextField(
         maxLines: maxLines,
@@ -269,6 +267,7 @@ static Widget _buildDropdown(String label, List<String> items) {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(fontSize: 14),
+          isDense: true,
           border: const OutlineInputBorder(),
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey),
@@ -298,21 +297,26 @@ static Widget _buildDropdown(String label, List<String> items) {
 
 
   static Widget _buildSummaryTable() {
-    return Table(
-      border: TableBorder.all(color: Colors.black26),
-      columnWidths: const {
-        0: FlexColumnWidth(2),
-        1: FlexColumnWidth(),
-        2: FlexColumnWidth(),
-        3: FlexColumnWidth(),
-      },
-      children: [
-        _buildTableHeader(),
-        _buildTableRow("Farinha", "3 kg", "1 kg", "2 kg"),
-        _buildTableRow("Carne Moída", "1,5 kg", "1,5 kg", "0 kg"),
-        _buildTableRow("Ovo", "1 unid", "3 unid", "0 unid"),
-        _buildTableRow("Leite [Extra]", "300 ml", "100 ml", "200 ml"),
-      ],
+    return SizedBox(
+      height: 100, 
+      child: SingleChildScrollView(
+        child: Table(
+          border: TableBorder.all(borderRadius: BorderRadius.circular(10),color: Colors.black26),
+          columnWidths: const {
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(),
+            2: FlexColumnWidth(),
+            3: FlexColumnWidth(),
+          },
+          children: [
+            _buildTableHeader(),
+            _buildTableRow("Farinha", "3 kg", "1 kg", "2 kg"),
+            _buildTableRow("Carne Moída", "1,5 kg", "1,5 kg", "0 kg"),
+            _buildTableRow("Ovo", "1 unid", "3 unid", "0 unid"),
+            _buildTableRow("Leite [Extra]", "300 ml", "100 ml", "200 ml"),
+          ],
+        ),
+      ),
     );
   }
 
