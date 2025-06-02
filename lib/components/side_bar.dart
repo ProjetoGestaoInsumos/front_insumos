@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/components/custom_popup.dart';
+import 'package:front_insumos/utils/colors.dart';
 
-class Sidebar extends StatelessWidget {
+class Sidebar extends StatefulWidget {
   final Function(int) onItemSelected;
   final int selectedIndex;
 
-  const Sidebar(
-      {super.key, required this.onItemSelected, required this.selectedIndex});
+  const Sidebar({
+    Key? key,
+    required this.onItemSelected,
+    required this.selectedIndex,
+  }) : super(key: key);
+
+  @override
+  State<Sidebar> createState() => _SidebarState();
+}
+
+class _SidebarState extends State<Sidebar> {
+  int? _hoveredIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +44,54 @@ class Sidebar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
-              children: [
-                for (int i = 0; i < items.length; i++)
-                  ListTile(
-                    leading: Icon(icons[i]),
-                    title: isCompact
-                        ? null
-                        : Text(
-                            items[i],
-                            style: const TextStyle(
-                              fontSize: 16,
+              children: List.generate(items.length, (i) {
+                final bool isSelected = widget.selectedIndex == i;
+                final bool isHovered = _hoveredIndex == i;
+
+                Color iconColor;
+                Color textColor;
+
+                if (isSelected) {
+                  iconColor = CustomColors.blue;
+                  textColor = CustomColors.blue;
+                } else if (isHovered) {
+                  iconColor = Colors.black;
+                  textColor = Colors.black;
+                } else {
+                  iconColor = Colors.black;
+                  textColor = Colors.black;
+                }
+
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (_) => setState(() => _hoveredIndex = i),
+                  onExit: (_) => setState(() => _hoveredIndex = null),
+                  child: GestureDetector(
+                    onTap: () => widget.onItemSelected(i),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color:
+                            (isSelected || isHovered) ? Colors.grey[300] : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(icons[i], color: iconColor),
+                          if (!isCompact) ...[
+                            const SizedBox(width: 10),
+                            Text(
+                              items[i],
+                              style: TextStyle(fontSize: 16, color: textColor),
                             ),
-                          ),
-                    selected: selectedIndex == i,
-                    onTap: () => onItemSelected(i),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-              ],
+                );
+              }),
             ),
           ),
           const Spacer(),
@@ -56,56 +99,81 @@ class Sidebar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               children: [
-                ListTile(
-                  leading: Icon(Icons.settings_outlined),
-                  title: isCompact
-                      ? null
-                      : Text(
-                          "Configuração",
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
+                _sidebarActionItem(
+                  icon: Icons.settings_outlined,
+                  label: "Configuração",
                   onTap: () {
                     CustomPopup.show(
                       context: context,
                       title: "Configuração",
-                      content: Text("Configuração do sistema"),
+                      content: const Text("Configuração do sistema"),
                       onClose: () => Navigator.of(context).pop(),
                       showFooter: true,
                       primaryButtonLabel: "Salvar",
                       primaryButtonOnPressed: () async {
-                        // Simula um atraso de 2 segundos
                         await Future.delayed(const Duration(seconds: 2));
-                        // Fecha o popup após o atraso
                         Navigator.of(context).pop();
                       },
                       secondaryButtonLabel: "Cancelar",
                       secondaryButtonOnPressed: () async {
-                        // Simula um atraso de 2 segundos
                         await Future.delayed(const Duration(seconds: 2));
-                        // Fecha o popup após o atraso
                         Navigator.of(context).pop();
                       },
                     );
                   },
+                  isCompact: isCompact,
+                  hoverKey: 100,
                 ),
-                ListTile(
-                  leading: Icon(Icons.logout_outlined),
-                  title: isCompact
-                      ? null
-                      : Text(
-                          "Sair",
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
+                _sidebarActionItem(
+                  icon: Icons.logout_outlined,
+                  label: "Sair",
                   onTap: () {},
+                  isCompact: isCompact,
+                  hoverKey: 101,
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _sidebarActionItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool isCompact,
+    required int hoverKey,
+  }) {
+    final bool isHovered = _hoveredIndex == hoverKey;
+    Color iconColor = isHovered ? Colors.black : Colors.black;
+    Color textColor = isHovered ? Colors.black : Colors.black;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hoveredIndex = hoverKey),
+      onExit: (_) => setState(() => _hoveredIndex = null),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: isHovered ? Colors.grey[300] : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor),
+              if (!isCompact) ...[
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 16, color: textColor),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -24,9 +24,7 @@ class HomePage extends StatelessWidget {
             CustomButton(
               text: "Layout",
               buttonColor: CustomColors.blue,
-              onPressed: () async {
-                Navigator.pushNamed(context, '/layout'); // Navega para Layout
-              },
+              onPressed: () async {},
             ),
           ],
         ),
