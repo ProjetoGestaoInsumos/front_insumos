@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/components/custom_search_field.dart';
+import 'package:front_insumos/components/custom_pagination.dart';
+import 'package:front_insumos/components/custom_button.dart';
+import 'package:front_insumos/components/orders_popup.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -9,36 +12,40 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
+    int rowsPerPage = 10;
+    int currentPage = 0;
+
+    int get totalPages => (/*_allOrders.length*/100 / rowsPerPage).ceil();
   final List<Map<String, String>> _allOrders = [
     {
-      'numero': '01',
-      'solicitante': 'Chef Ana',
-      'data': '20/05/2025',
-      'receita': 'Macarrão Carbonara',
-      'ingrediente': 'Queijo Parmesão',
-      'quantidade': '2',
-      'unidade': 'Kg',
-      'status': '✅'
+      'Numero': '01',
+      'Solicitante': 'Chef Ana',
+      'Data': '20/05/2025',
+      'Receita': 'Macarrão Carbonara',
+      'Quantidade': '2',
+      'Cursos': 'Kg',
+      'Detalhes': 'Ver Pedido',
+      'Status': 'Pendente'
     },
     {
-      'numero': '02',
-      'solicitante': 'Chef Bruno',
-      'data': '21/05/2025',
-      'receita': 'Risoto de Cogumelos',
-      'ingrediente': 'Arroz Arbório',
-      'quantidade': '5',
-      'unidade': 'Kg',
-      'status': '😐'
+      'Numero': '02',
+      'Solicitante': 'Chef Bruno',
+      'Data': '21/05/2025',
+      'Receita': 'Risoto de Cogumelos',
+      'Quantidade': '5',
+      'Cursos': 'Kg',
+      'Detalhes': 'Ver Pedido',
+      'Status': 'Indeferido'
     },
     {
-      'numero': '03',
-      'solicitante': 'Chef Carla',
-      'data': '22/05/2025',
-      'receita': 'Tiramisu',
-      'ingrediente': 'Café',
-      'quantidade': '1',
-      'unidade': 'Litro',
-      'status': '❌'
+      'Numero': '03',
+      'Solicitante': 'Chef Carla',
+      'Data': '22/05/2025',
+      'Receita': 'Tiramisu',
+      'Quantidade': '1',
+      'Cursos': 'Litro',
+      'Detalhes': 'Ver Pedido',
+      'Status': 'Deferido'
     },
   ];
 
@@ -50,17 +57,38 @@ class _OrdersPageState extends State<OrdersPage> {
     _filteredOrders = List.from(_allOrders);
   }
 
-void _filterOrders(String query) {
-  setState(() {
-    final search = query.toLowerCase().replaceAll(RegExp(r'[-\\]'), '/');
-    _filteredOrders = _allOrders.where((order) {
-      final numero = order['numero']!.toLowerCase();
-      final solicitante = order['solicitante']!.toLowerCase();
-      final data = order['data']!.toLowerCase().replaceAll(RegExp(r'[-\\]'), '/');
-      return numero.contains(search) || solicitante.contains(search) || data.contains(search);
-    }).toList();
-  });
-}
+  void goToPage(int page) {
+    if (page >= 0 && page < totalPages) {
+      setState(() {
+        currentPage = page;
+      });
+    }
+  }
+
+  void _filterOrders(String query) {
+    setState(() {
+      final search = query.toLowerCase().replaceAll(RegExp(r'[-\\]'), '/');
+      _filteredOrders = _allOrders.where((order) {
+        final numero = order['Numero']!.toLowerCase();
+        final solicitante = order['Solicitante']!.toLowerCase();
+        final data = order['Data']!.toLowerCase().replaceAll(RegExp(r'[-\\]'), '/');
+        return numero.contains(search) || solicitante.contains(search) || data.contains(search);
+      }).toList();
+    });
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pendente':
+        return Colors.orange;
+      case 'indeferido':
+        return Colors.red;
+      case 'deferido':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +102,7 @@ void _filterOrders(String query) {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+
                 CustomSearchField(
                   hintText: 'Buscar por Número, Nome ou Data',
                   width: 350,
@@ -81,56 +110,79 @@ void _filterOrders(String query) {
                   icon: Icons.search,
                   onChanged: _filterOrders,
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.file_open),
-                  label: const Text('Abrir POP'),
-                ),
+
+              CustomButton(
+                iconData: Icons.file_open,
+                text: 'Abrir POP',
+                buttonColor: Color(0xFF4A83A7),
+                onPressed: () async {
+                  showOrderPopup(context);
+                },
+              ),
+
               ],
             ),
             const SizedBox(height: 20),
             // Tabela de pedidos
             Expanded(
               child: SingleChildScrollView(
-                child: DataTable(
+                child: DataTable(headingRowColor: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
+                 return Colors.grey[300]; 
+                 },
+              ),
+                  border: TableBorder(
+                  horizontalInside: BorderSide(width: 1, color: Colors.grey.shade400),
+              ),
                   columns: const [
-                    DataColumn(label: Text('Nº Pedido')),
-                    DataColumn(label: Text('Solicitante')),
-                    DataColumn(label: Text('Data')),
-                    DataColumn(label: Text('Receita')),
-                    DataColumn(label: Text('Ingrediente')),
-                    DataColumn(label: Text('Quantidade')),
-                    DataColumn(label: Text('Unidade')),
-                    DataColumn(label: Text('Status')),
+                    DataColumn(label: Text('Nº Pedido', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Solicitante',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Data',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Receita',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Quantidade',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Cursos',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Detalhes',style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Status',style: TextStyle(fontWeight: FontWeight.bold))),
                   ],
                   rows: _filteredOrders.map((order) {
+                    final status = order['Status']!;
                     return DataRow(cells: [
-                      DataCell(Text(order['numero']!)),
-                      DataCell(Text(order['solicitante']!)),
-                      DataCell(Text(order['data']!)),
-                      DataCell(Text(order['receita']!)),
-                      DataCell(Text(order['ingrediente']!)),
-                      DataCell(Text(order['quantidade']!)),
-                      DataCell(Text(order['unidade']!)),
-                      DataCell(Text(order['status']!, style: const TextStyle(fontSize: 18))),
+                      DataCell(Text(order['Numero']!)),
+                      DataCell(Text(order['Solicitante']!)),
+                      DataCell(Text(order['Data']!)),
+                      DataCell(Text(order['Receita']!)),
+                      DataCell(Text(order['Quantidade']!)),
+                      DataCell(Text(order['Cursos']!)),
+                      DataCell(Text(order['Detalhes']!)),
+                      DataCell(Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _getStatusColor(status),
+                              ),
+                            ),
+                            Text(
+                              status,
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: _getStatusColor(status)),
+                            ),
+                          ],
+                        ),
+                      ),
                     ]);
                   }).toList(),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            // Paginação (placeholder por enquanto)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back_ios)),
-                TextButton(onPressed: () {}, child: const Text('1', style: TextStyle(fontWeight: FontWeight.bold))),
-                TextButton(onPressed: () {}, child: const Text('2')),
-                const Text('...'),
-                TextButton(onPressed: () {}, child: const Text('68')),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_forward_ios)),
-              ],
-            )
+        const SizedBox(height: 16),
+         CustomPagination(
+          currentPage: currentPage,
+          totalPages: totalPages,
+          onPageChanged: goToPage,
+        ),
           ],
         ),
       ),

@@ -1,0 +1,355 @@
+import 'package:flutter/material.dart';
+import 'package:front_insumos/components/custom_popup.dart';
+import 'package:front_insumos/utils/colors.dart';
+import 'package:front_insumos/components/custom_button.dart';
+
+void showOrderPopup(BuildContext context) {
+  CustomPopup.show(
+    context: context,
+    title: "POP",
+    onClose: () => Navigator.of(context).pop(),
+    showFooter: true,
+    primaryButtonLabel: "Sim",
+    secondaryButtonLabel: "Não",
+    primaryButtonOnPressed: () async {
+      Navigator.of(context).pop();
+    },
+    secondaryButtonOnPressed: () async {
+      Navigator.of(context).pop();
+    },
+    content: const OrderPopupContent(),
+  );
+}
+
+void showAddItemPopup(BuildContext context) {
+  String? selectedIngredient;
+  final TextEditingController unitController = TextEditingController();
+
+  CustomPopup.show(
+    context: context,
+    title: "Adicionar item extra",
+    onClose: () => Navigator.of(context).pop(),
+    showFooter: true,
+    primaryButtonLabel: "Sim",
+    secondaryButtonLabel: "Não",
+    primaryButtonOnPressed: () async {
+      if (selectedIngredient == null || unitController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Preencha todos os campos')),
+        );
+        return;
+      }
+      // ✅ Aqui você pode processar os dados capturados
+      // print('Ingrediente: $selectedIngredient');
+      // print('Unidade: ${unitController.text}');
+
+      Navigator.of(context).pop();
+      return;
+    },
+    secondaryButtonOnPressed: () async {
+      Navigator.of(context).pop();
+      return;
+    },
+    content: StatefulBuilder(
+      builder: (context, setState) {
+        return SizedBox(
+          width: 400,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(thickness: 1),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text('Ingrediente', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('Quantidade', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(),
+                      ),
+                      value: selectedIngredient,
+                      hint: const Text('Selecione'),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedIngredient = value;
+                        });
+                      },
+                      items: ['Leite', 'Farinha', 'Ovo', 'Carne']
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 1,
+                    child: TextField(
+                      controller: unitController,
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(),
+                        hintText: 'Ex: 300 ml',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Divider(thickness: 1),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+
+class OrderPopupContent extends StatelessWidget {
+  const OrderPopupContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 850,
+      height: 620,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: _buildTextField("Curso")),
+                const SizedBox(width: 16),
+                Expanded(child: _buildTextField("Docente")),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildTextField("Disciplina"),
+                ),
+                const SizedBox(width: 22),
+                Expanded(
+                  flex: 1,
+                  child: _buildTextField("N de alunos"),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  flex: 1,
+                  child: _buildTextField("N de grupos"),
+                ),
+              ],
+            ),
+
+
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: _buildDateField(context)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildDropdown("Turno", ["Manhã", "Tarde", "Noite"])),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: _buildDropdown("Protocolo", ["Padrão", "Outro"])),
+                const SizedBox(width: 16),
+                Expanded(child: _buildDropdown("Receita", ["Receita 1", "Receita 2"])),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _buildTextField("Objetivo", maxLines: 5, expand: true),
+            const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: CustomButton(
+              onPressed:() async  {
+                showAddItemPopup(context);
+                return;
+              },
+              iconData: Icons.add,
+              text: "Adicionar Item Extra",
+              buttonColor:Color(0xFF4A83A7),
+              iconColor: Colors.white,
+              borderRadius: 4,
+            ),
+          ),
+            const SizedBox(height: 10),
+            _buildSummaryTable(),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===============================
+  // Widgets Auxiliares
+  // ===============================
+
+  static Widget _buildTextField(String label, {int maxLines = 1, bool expand = false}) {
+    return SizedBox(
+      width: expand ? double.infinity : 230,
+      child: TextField(
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(fontSize: 14),
+          border: const OutlineInputBorder(),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: CustomColors.blue),
+          ),
+        ),
+      ),
+    );
+  }
+
+static Widget _buildDateField(BuildContext context) {
+  final TextEditingController controller = TextEditingController();
+
+  return TextField(
+    controller: controller,
+    decoration: const InputDecoration(
+      labelText: "Data",
+      suffixIcon: Icon(Icons.calendar_today),
+      labelStyle: TextStyle(fontSize: 14),
+      border: OutlineInputBorder(),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: CustomColors.blue),
+      ),
+    ),
+    readOnly: true,
+    onTap: () async {
+      final DateTime? pickedDate = await showDatePicker(
+        context: context,
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2100),
+        initialDate: DateTime.now(),
+      );
+
+      if (pickedDate != null) {
+        controller.text =
+            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+      }
+    },
+  );
+}
+
+
+static Widget _buildDropdown(String label, List<String> items) {
+  String? selectedItem;
+
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(fontSize: 14),
+          border: const OutlineInputBorder(),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: CustomColors.blue),
+          ),
+        ),
+        value: selectedItem,
+        onChanged: (value) {
+          setState(() {
+            selectedItem = value;
+          });
+        },
+        items: items
+            .map(
+              (item) => DropdownMenuItem(
+                value: item,
+                child: Text(item),
+              ),
+            )
+            .toList(),
+      );
+    },
+  );
+}
+
+
+  static Widget _buildSummaryTable() {
+    return Table(
+      border: TableBorder.all(color: Colors.black26),
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(),
+        2: FlexColumnWidth(),
+        3: FlexColumnWidth(),
+      },
+      children: [
+        _buildTableHeader(),
+        _buildTableRow("Farinha", "3 kg", "1 kg", "2 kg"),
+        _buildTableRow("Carne Moída", "1,5 kg", "1,5 kg", "0 kg"),
+        _buildTableRow("Ovo", "1 unid", "3 unid", "0 unid"),
+        _buildTableRow("Leite [Extra]", "300 ml", "100 ml", "200 ml"),
+      ],
+    );
+  }
+
+  static TableRow _buildTableHeader() {
+    return TableRow(
+      decoration: const BoxDecoration(color: Color(0xFFEFEFEF)),
+      children: [
+        _tableCell("Ingredientes", isHeader: true),
+        _tableCell("Necessário", isHeader: true),
+        _tableCell("Em estoque", isHeader: true),
+        _tableCell("Faltando", isHeader: true),
+      ],
+    );
+  }
+
+  static TableRow _buildTableRow(
+      String ingrediente, String necessario, String estoque, String faltando) {
+    return TableRow(
+      children: [
+        _tableCell(ingrediente),
+        _tableCell(necessario),
+        _tableCell(estoque),
+        _tableCell(faltando),
+      ],
+    );
+  }
+
+  static Widget _tableCell(String text, {bool isHeader = false}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+}
