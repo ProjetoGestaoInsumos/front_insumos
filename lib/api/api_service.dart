@@ -17,7 +17,7 @@ class ApiService {
   Future<Response?> login(String email, String password) async {
     try {
       final response = await _dio.post(
-        "http://127.0.0.1:8000/auth/login",
+        "$baseUrl/auth/login",
         options: Options(
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -39,12 +39,12 @@ class ApiService {
       String name, String email, String password, String userType) async {
     try {
       final response = await _dio.post(
-        "http://127.0.0.1:8000/auth/register",
+        "$baseUrl/auth/register",
         options: Options(
-        headers: {
-          "Content-Type": "application/json",
-        },
-      ),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        ),
         data: {
           'name': name,
           'email': email,
