@@ -3,6 +3,7 @@ import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/components/custom_pagination.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/components/orders_popup.dart';
+import 'package:front_insumos/utils/colors.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -77,6 +78,19 @@ class _OrdersPageState extends State<OrdersPage> {
     });
   }
 
+Widget _buildCell(String text) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Center(
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 14),
+      ),
+    ),
+  );
+}
+
+
   Widget _getStatusIcon(String status) {
   switch (status.toLowerCase()) {
     case 'pendente':
@@ -103,8 +117,8 @@ class _OrdersPageState extends State<OrdersPage> {
               children: [
 
                 CustomSearchField(
-                  hintText: 'Buscar por Número, Nome ou Data',
-                  width: 350,
+                  hintText: 'Buscar',
+                  width: 250,
                   borderRadius: 12,
                   icon: Icons.search,
                   onChanged: _filterOrders,
@@ -113,7 +127,7 @@ class _OrdersPageState extends State<OrdersPage> {
               CustomButton(
                 iconData: Icons.note_add_outlined,
                 text: 'Abrir POP',
-                buttonColor: Color(0xFF4A83A7),
+                buttonColor: CustomColors.blue,
                 onPressed: () async {
                   showOrderPopup(context);
                 },
@@ -123,42 +137,88 @@ class _OrdersPageState extends State<OrdersPage> {
             ),
             const SizedBox(height: 20),
             // Tabela de pedidos
-            Expanded(
-              child: SingleChildScrollView(
-                child: DataTable(headingRowColor: WidgetStateProperty.resolveWith<Color?>(
-                (Set<WidgetState> states) {
-                 return Colors.grey[300]; 
-                 },
-              ),
-                  border: TableBorder(
-                  horizontalInside: BorderSide(width: 1, color: Colors.grey.shade400),
-              ),
-                  columns: const [
-                    DataColumn(label: Text('Nº Pedido', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Solicitante',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Data',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Receita',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Quantidade',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Cursos',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Detalhes',style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Status',style: TextStyle(fontWeight: FontWeight.bold))),
-                  ],
-                  rows: _filteredOrders.map((order) {
-                    final status = order['Status']!;
-                    return DataRow(cells: [
-                      DataCell(Text(order['Numero']!)),
-                      DataCell(Text(order['Solicitante']!)),
-                      DataCell(Text(order['Data']!)),
-                      DataCell(Text(order['Receita']!)),
-                      DataCell(Text(order['Quantidade']!)),
-                      DataCell(Text(order['Cursos']!)),
-                      DataCell(Text(order['Detalhes']!)),
-                      DataCell(Center(child: _getStatusIcon(status)),
-                    )]);
-                  }).toList(),
-                ),
-              ),
+           Expanded(
+  child: SingleChildScrollView(
+    scrollDirection: Axis.vertical,
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Table(
+        border: TableBorder(
+          horizontalInside: BorderSide(
+            color: Colors.grey.shade400,
+            width: 1,
+          ),
+        ),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        columnWidths: const {
+          0: FlexColumnWidth(1),
+          1: FlexColumnWidth(2),
+          2: FlexColumnWidth(1.5),
+          3: FlexColumnWidth(2),
+          4: FlexColumnWidth(1.5),
+          5: FlexColumnWidth(2),
+          6: FlexColumnWidth(2),
+          7: FlexColumnWidth(1.5),
+        },
+        children: [
+          /// Cabeçalho
+         TableRow(
+          decoration: BoxDecoration(
+          color: const Color(0xFFE0E0E0),
+        ),
+            children: [
+              for (final header in [
+                'Nº PEDIDO',
+                'SOLICITANTE',
+                'DATA',
+                'RECEITA',
+                'QUANTIDADE',
+                'CURSOS',
+                'DETALHES',
+                'STATUS',
+              ])
+
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: const BoxDecoration(
+            border: Border(
             ),
+          ),
+          child: Center(
+            child: Text(
+              header,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+        ),
+    ],
+  ),
+          /// Dados dinâmicos
+          for (final order in _filteredOrders)
+            TableRow(
+              children: [
+                _buildCell(order['Numero']!),
+                _buildCell(order['Solicitante']!),
+                _buildCell(order['Data']!),
+                _buildCell(order['Receita']!),
+                _buildCell(order['Quantidade']!),
+                _buildCell(order['Cursos']!),
+                _buildCell(order['Detalhes']!),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Center(child: _getStatusIcon(order['Status']!)),
+                ),
+              ],
+            ),
+        ],
+      ),
+    ),
+  ),
+),
             Align(
                     alignment: Alignment.centerRight,
                     child: CustomPagination(
