@@ -4,6 +4,7 @@ import 'package:front_insumos/layouts/main_layout.dart';
 import 'package:front_insumos/screens/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/items_test_page.dart';
+import 'package:front_insumos/screens/orders_page.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
             ItemsTestPage(), // Rota para a página de produtos
         '/layout': (context) => MainLayout(), // Rota para o layout
         '/historico': (context) => HistoryPage(),
+        '/pedidos' : (context) => OrdersPage(),
       },
     );
   }
