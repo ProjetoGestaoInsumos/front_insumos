@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:front_insumos/components/side_bar.dart';
 import 'package:front_insumos/components/top_bar.dart';
 import 'package:front_insumos/screens/home_page.dart';
+import 'package:front_insumos/screens/stock_page.dart';
 import 'package:front_insumos/screens/history_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
 
@@ -17,7 +18,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> pages = [
     HomePage(),
-    HomePage(),
+    StockPage(),
     HistoryPage(),
     OrdersPage(),
     HomePage(),
