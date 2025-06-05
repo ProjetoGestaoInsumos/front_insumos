@@ -4,6 +4,7 @@ import 'package:front_insumos/layouts/main_layout.dart';
 import 'package:front_insumos/screens/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/items_test_page.dart';
+import 'package:front_insumos/screens/orders_page.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
