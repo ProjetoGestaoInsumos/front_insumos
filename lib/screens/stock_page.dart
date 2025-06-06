@@ -31,30 +31,21 @@ class _StockPageState extends State<StockPage> {
       body: Row(
         children: [
           Expanded(
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: const Center(
-                    child: Text(
-                      'Gerenciar Estoque',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    'Gerenciar Estoque',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32),
-                  child: Divider(
-                    thickness: 2,
-                    color: Colors.grey,
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  child: Row(
+                  const Divider(thickness: 1, color: Colors.grey),
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
                       CustomSearchField(
                         width: 250,
@@ -77,92 +68,61 @@ class _StockPageState extends State<StockPage> {
                         iconData: Icons.add_circle_outline, //essa linha
                         buttonColor: CustomColors.blue, //essa linha
                         onPressed: () async {
-                          await _showRegisterIngredientDialog(context);
+                          _showRegisterIngredientDialog(context);
                         },
                       ),
                     ],
                   ),
-                ),
 
-                // 👉 Espaçamento atualizado para o dobro
-                const SizedBox(height: 32),
+                  // 👉 Espaçamento atualizado para o dobro
+                  const SizedBox(height: 20),
 
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Column(
-                      children: [
-                        Container(
-                          color: Colors.grey[300],
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 8),
-                          child: Row(
-                            children: const [
-                              Expanded(
-                                  child: Text('INGREDIENTE',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('CATEGORIA',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('UNIDADE',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('LOTES',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('VALIDADE',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('TOTAL',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                              Expanded(
-                                  child: Text('STATUS',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold))),
-                            ],
-                          ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Table(
+                        border: TableBorder(
+                          horizontalInside:
+                              BorderSide(color: Colors.grey.shade400, width: 1),
                         ),
-                        const Divider(height: 1),
-                        Expanded(
-                          child: ListView(
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        columnWidths: const {
+                          0: FlexColumnWidth(2),
+                          1: FlexColumnWidth(2),
+                          2: FlexColumnWidth(1.5),
+                          3: FlexColumnWidth(1),
+                          4: FlexColumnWidth(2),
+                          5: FlexColumnWidth(1.5),
+                          6: FlexColumnWidth(2),
+                        },
+                        children: [
+                          TableRow(
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFE0E0E0),
+                            ),
                             children: [
-                              _buildRow(
-                                  'Arroz',
-                                  'Secos',
-                                  'Kg',
-                                  '2',
-                                  '11/04/2025',
-                                  '30 Kg',
-                                  Colors.orange,
-                                  'A vencer'),
-                              _buildRow('Leite', 'Laticínios', 'Litros', '1',
-                                  '06/04/2025', '20 L', Colors.red, 'Vencido'),
-                              _buildRow(
-                                  'Ovos',
-                                  'Ovos',
-                                  'Unidades',
-                                  '1',
-                                  '19/04/2025',
-                                  '20 un',
-                                  Colors.green,
-                                  'Normal'),
+                              _buildHeaderCell('INGREDIENTE'),
+                              _buildHeaderCell('CATEGORIA'),
+                              _buildHeaderCell('UNIDADE'),
+                              _buildHeaderCell('LOTES'),
+                              _buildHeaderCell('VALIDADE'),
+                              _buildHeaderCell('TOTAL'),
+                              _buildHeaderCell('STATUS'),
                             ],
                           ),
-                        ),
-                      ],
+                          _buildDataRow('Arroz', 'Secos', 'Kg', '2',
+                              '11/04/2025', '30 Kg', Colors.orange, 'A vencer'),
+                          _buildDataRow('Leite', 'Laticínios', 'Litros', '1',
+                              '06/04/2025', '20 L', Colors.red, 'Vencido'),
+                          _buildDataRow('Ovos', 'Ovos', 'Unidades', '1',
+                              '19/04/2025', '20 un', Colors.green, 'Normal'),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Align(
+
+                  Align(
                     alignment: Alignment.centerRight,
                     child: CustomPagination(
                       currentPage: currentPage,
@@ -170,8 +130,8 @@ class _StockPageState extends State<StockPage> {
                       onPageChanged: goToPage,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -179,7 +139,19 @@ class _StockPageState extends State<StockPage> {
     );
   }
 
-  static Widget _buildRow(
+  Widget _buildHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  TableRow _buildDataRow(
     String ingrediente,
     String categoria,
     String unidade,
@@ -189,36 +161,33 @@ class _StockPageState extends State<StockPage> {
     Color statusColor,
     String statusText,
   ) {
-    return Column(
+    return TableRow(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        _buildCell(ingrediente),
+        _buildCell(categoria),
+        _buildCell(unidade),
+        _buildCell(lotes),
+        _buildCell(validade),
+        _buildCell(total),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 18),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(child: Text(ingrediente)),
-              Expanded(child: Text(categoria)),
-              Expanded(child: Text(unidade)),
-              Expanded(child: Text(lotes)),
-              Expanded(child: Text(validade)),
-              Expanded(child: Text(total)),
-              Expanded(
-                child: Row(
-                  children: [
-                    Icon(Icons.circle, color: statusColor, size: 12),
-                    const SizedBox(width: 4),
-                    Text(statusText, style: TextStyle(color: statusColor)),
-                  ],
-                ),
-              ),
+              Icon(Icons.circle, size: 12, color: statusColor),
+              const SizedBox(width: 4),
+              Text(statusText, style: TextStyle(color: statusColor)),
             ],
           ),
         ),
-        const Divider(
-          height: 1,
-          thickness: 1,
-          color: Colors.grey,
-        ),
       ],
+    );
+  }
+
+  Widget _buildCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Center(child: Text(text)),
     );
   }
 
@@ -230,17 +199,14 @@ class _StockPageState extends State<StockPage> {
     await CustomPopup.show(
       context: context,
       title: 'Adicionar Lote',
-      onClose: () => Navigator.of(context).pop(),
       showFooter: true,
       primaryButtonLabel: 'Sim',
       primaryButtonOnPressed: () async {
-        Navigator.of(context).pop();
-        return Future.value();
+        Navigator.of(context, rootNavigator: true).pop();
       },
       secondaryButtonLabel: 'Não',
       secondaryButtonOnPressed: () async {
-        Navigator.of(context).pop();
-        return Future.value();
+        Navigator.of(context, rootNavigator: true).pop();
       },
       content: StatefulBuilder(
         builder: (context, setState) {
@@ -337,24 +303,20 @@ class _StockPageState extends State<StockPage> {
   }
 
   Future<void> _showRegisterIngredientDialog(BuildContext context) async {
-    String nomeValue = 'Tomate';
     String categoriaValue = 'Hortaliças';
     String unidadeValue = 'Kg';
 
     await CustomPopup.show(
       context: context,
       title: 'Cadastrar Ingrediente',
-      onClose: () => Navigator.of(context).pop(),
       showFooter: true,
       primaryButtonLabel: 'Sim',
       primaryButtonOnPressed: () async {
-        Navigator.of(context).pop();
-        return Future.value();
+        Navigator.of(context, rootNavigator: true).pop();
       },
       secondaryButtonLabel: 'Não',
       secondaryButtonOnPressed: () async {
-        Navigator.of(context).pop();
-        return Future.value();
+        Navigator.of(context, rootNavigator: true).pop();
       },
       content: StatefulBuilder(
         builder: (context, setState) {
@@ -365,13 +327,12 @@ class _StockPageState extends State<StockPage> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      initialValue: nomeValue,
-                      onChanged: (value) => setState(() => nomeValue = value),
                       decoration: const InputDecoration(
                         labelText: 'nome',
                         isDense: true,
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
                     ),
                   ),

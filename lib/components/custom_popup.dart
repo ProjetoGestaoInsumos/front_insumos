@@ -29,7 +29,7 @@ class CustomPopup extends StatefulWidget {
     required BuildContext context,
     required String title,
     required Widget content,
-    required VoidCallback onClose,
+    VoidCallback? onClose,
     bool showFooter = false,
     String? primaryButtonLabel,
     Future<void> Function()? primaryButtonOnPressed,
@@ -42,7 +42,7 @@ class CustomPopup extends StatefulWidget {
         return CustomPopup(
           title: title,
           content: content,
-          onClose: onClose,
+          onClose: onClose ?? () => Navigator.of(dialogContext).pop(),
           showFooter: showFooter,
           primaryButtonLabel: primaryButtonLabel,
           primaryButtonOnPressed: primaryButtonOnPressed,

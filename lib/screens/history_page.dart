@@ -14,7 +14,7 @@ class _HistoryPageCotentState extends State<HistoryPage> {
   final List<Map<String, dynamic>> movimentacoes = List.generate(105, (index) {
     bool isEntrada = index % 2 == 0;
     return {
-      'movimento': isEntrada ? 'Entrada' : 'Saída',
+      'movimento': isEntrada ? 'Entrada' : 'Saída    ',
       'ingrediente': 'Ingrediente ${index + 1}',
       'categoria': 'Categoria ${index % 5 + 1}',
       'quantidade': (isEntrada ? 10 : -5) * (index + 1),
@@ -100,13 +100,12 @@ Widget buildMobileList() {
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Table(
-            border: const TableBorder(
+            border: TableBorder(
               horizontalInside: BorderSide(
-                color: Color.fromARGB(80, 158, 158, 158),
+                color: Colors.grey.shade400,
                 width: 1,
               ),
             ),
@@ -207,6 +206,7 @@ return Padding(
   padding: const EdgeInsets.all(16),
   child: Column(
     children: [
+      const SizedBox(height: 24),
       Text(
         'Histórico de movimentação',
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -214,9 +214,8 @@ return Padding(
             ),
         textAlign: TextAlign.center,
       ),
+      const Divider(thickness: 1, color: Colors.grey),
       const SizedBox(height: 8),
-      const Divider(thickness: 2, color: Colors.black),
-      const SizedBox(height: 16),
       Align(
         alignment: isMobile ? Alignment.center : Alignment.centerLeft,
         child: CustomSearchField(
@@ -226,11 +225,11 @@ return Padding(
           },
         ),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
       isMobile ? buildMobileList() : buildDesktopTable(context),
       const SizedBox(height: 16),
       Align(
-        alignment: Alignment.center,
+        alignment: Alignment.centerRight,
         child: CustomPagination(
           currentPage: currentPage,
           totalPages: totalPages,

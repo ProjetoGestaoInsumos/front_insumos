@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:front_insumos/components/custom_popup.dart';
 import 'package:front_insumos/utils/colors.dart';
 
@@ -36,10 +37,18 @@ class _SidebarState extends State<Sidebar> {
       color: Colors.grey.shade200,
       child: Column(
         children: [
-          const SizedBox(height: 40),
-          if (!isCompact)
-            const Text("Logo Unicesumar",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ClipRect(
+              child: Align(
+                alignment: Alignment.center,
+                heightFactor:
+                    0.5, // ajuste para recortar a parte de cima e baixo
+                child: SvgPicture.asset(
+                  'images/unicesumar-logo.svg',
+                  height: 180,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -72,8 +81,9 @@ class _SidebarState extends State<Sidebar> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
-                        color:
-                            (isSelected || isHovered) ? Colors.grey[300] : Colors.transparent,
+                        color: (isSelected || isHovered)
+                            ? Colors.grey[300]
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(

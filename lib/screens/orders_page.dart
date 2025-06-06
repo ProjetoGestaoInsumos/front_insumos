@@ -106,21 +106,28 @@ Widget _buildCell(String text) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pedidos'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            const SizedBox(height: 24),
+            Text(
+        'Pedidos',
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        textAlign: TextAlign.center,
+      ),
+      const Divider(thickness: 1, color: Colors.grey),
+      const SizedBox(height: 8),
             // Linha de busca e botão
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
 
                 CustomSearchField(
-                  hintText: 'Buscar',
                   width: 250,
                   borderRadius: 12,
-                  icon: Icons.search,
                   onChanged: _filterOrders,
                 ),
 
@@ -140,9 +147,8 @@ Widget _buildCell(String text) {
            Expanded(
   child: SingleChildScrollView(
     scrollDirection: Axis.vertical,
-    child: Container(
+    child: SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Table(
         border: TableBorder(
           horizontalInside: BorderSide(
@@ -209,7 +215,7 @@ Widget _buildCell(String text) {
                 _buildCell(order['Cursos']!),
                 _buildCell(order['Detalhes']!),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(child: _getStatusIcon(order['Status']!)),
                 ),
               ],
