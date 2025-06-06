@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/layouts/main_layout.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
 import 'package:front_insumos/screens/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/items_test_page.dart';
