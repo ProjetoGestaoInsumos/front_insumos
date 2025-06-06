@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:front_insumos/components/custom_popup.dart';
+import 'package:front_insumos/main.dart';
 import 'package:front_insumos/utils/colors.dart';
 
 class Sidebar extends StatefulWidget {
@@ -37,18 +38,17 @@ class _SidebarState extends State<Sidebar> {
       color: Colors.grey.shade200,
       child: Column(
         children: [
-            ClipRect(
-              child: Align(
-                alignment: Alignment.center,
-                heightFactor:
-                    0.5, // ajuste para recortar a parte de cima e baixo
-                child: SvgPicture.asset(
-                  'images/unicesumar-logo.svg',
-                  height: 180,
-                  fit: BoxFit.contain,
-                ),
+          ClipRect(
+            child: Align(
+              alignment: Alignment.center,
+              heightFactor: 0.5, // ajuste para recortar a parte de cima e baixo
+              child: SvgPicture.asset(
+                'images/unicesumar-logo.svg',
+                height: 180,
+                fit: BoxFit.contain,
               ),
             ),
+          ),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -137,7 +137,25 @@ class _SidebarState extends State<Sidebar> {
                 _sidebarActionItem(
                   icon: Icons.logout_outlined,
                   label: "Sair",
-                  onTap: () {},
+                  onTap: () {
+                    CustomPopup.show(
+                      context: context,
+                      title: "Sair do sistema",
+                      content: const Text("Deseja realmente sair?"),
+                      showFooter: true,
+                      primaryButtonLabel: "Sim",
+                      primaryButtonOnPressed: () async {
+                        authNotifier.value = false;
+                        Navigator.of(context).pop(); // Fecha o popup
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/login', (route) => false);
+                      },
+                      secondaryButtonLabel: "Cancelar",
+                      secondaryButtonOnPressed: () async {
+                        Navigator.of(context).pop(); // Fecha o popup
+                      },
+                    );
+                  },
                   isCompact: isCompact,
                   hoverKey: 101,
                 ),

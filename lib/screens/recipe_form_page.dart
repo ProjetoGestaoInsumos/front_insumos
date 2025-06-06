@@ -205,20 +205,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome da Receita',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'O nome da receita é obrigatório.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
                 Center(
                   child: _selectedImage != null
                       ? Image.file(
@@ -279,6 +265,29 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome da Receita',
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey, // borda padrão
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'O nome da receita é obrigatório.';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 5,
@@ -286,6 +295,12 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                     labelText: 'Descrição da Receita',
                     alignLabelWithHint: true,
                     border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey, // borda padrão
+                        width: 1.0,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -313,7 +328,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                             _selectedIngredientItem = null; // Reseta a seleção
                             _ingredientQuantityController
                                 .clear(); // Limpa a quantidade
-                            await CustomPopup.show(
+                            CustomPopup.show(
                               context: context,
                               title: "Adicionar Ingrediente",
                               content: StatefulBuilder(

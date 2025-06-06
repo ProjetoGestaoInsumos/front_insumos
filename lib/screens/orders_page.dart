@@ -4,9 +4,11 @@ import 'package:front_insumos/components/custom_pagination.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/components/orders_popup.dart';
 import 'package:front_insumos/utils/colors.dart';
+import 'package:go_router/go_router.dart';
 
 class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+  final bool abrirPop;
+  const OrdersPage({super.key, this.abrirPop = false});
 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
@@ -55,6 +57,11 @@ class _OrdersPageState extends State<OrdersPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (widget.abrirPop) {
+      showOrderPopup(context);
+    }
+  });
     _filteredOrders = List.from(_allOrders);
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/components/custom_button.dart';
+import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/screens/recipe_form_page.dart';
 import 'package:front_insumos/utils/colors.dart';
+import 'package:go_router/go_router.dart';
 
 class RecipesPage extends StatefulWidget {
   const RecipesPage({super.key});
@@ -79,45 +81,36 @@ class _RecipesPageState extends State<RecipesPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Título "Receitas"
+          const SizedBox(height: 24),
           Center(
-            child: const Text(
+            child: Text(
               'Receitas',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(height: 20),
+          const Divider(thickness: 1, color: Colors.grey),
+          const SizedBox(height: 8),
           Row(
             children: [
               // Barra de Pesquisa
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Pesquisar receitas...',
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: CustomColors.blue,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none, // Remove a borda padrão
-                    ),
-                    filled: true,
-                    fillColor:
-                        CustomColors.grey, // Cor de fundo conforme a imagem
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: CustomSearchField(
+                  width: 250,
                   onChanged: (value) {
-                    // O _onSearchChanged já cuida disso via listener no controller
+                    // lógica de busca
                   },
                 ),
               ),
-              const SizedBox(width: 20),
+              Spacer(),
               // Botão "Adicionar Nova Receita"
               CustomButton(
                 text: "Adicionar Nova Receita",
@@ -126,12 +119,7 @@ class _RecipesPageState extends State<RecipesPage> {
                 fontSize: 16,
                 iconData: Icons.add, // Adiciona o ícone de adição
                 onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RecipeFormPage(),
-                    ),
-                  );
+                  context.push('/receitas/novo');
                   _fetchRecipes(); // Recarrega a lista após adicionar
                 },
               ),

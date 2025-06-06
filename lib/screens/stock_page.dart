@@ -6,7 +6,8 @@ import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/utils/colors.dart';
 
 class StockPage extends StatefulWidget {
-  const StockPage({super.key});
+  final bool abrirPop;
+  const StockPage({super.key, this.abrirPop = false});
 
   @override
   State<StockPage> createState() => _StockPageState();
@@ -23,6 +24,16 @@ class _StockPageState extends State<StockPage> {
         currentPage = page;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (widget.abrirPop) {
+      _showAddBatchDialog(context);
+    }
+  });
   }
 
   @override
