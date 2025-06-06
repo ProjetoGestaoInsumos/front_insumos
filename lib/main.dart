@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/layouts/main_layout.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
 import 'package:front_insumos/screens/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
@@ -15,7 +19,15 @@ void main() {
   if (kIsWeb) {
     setUrlStrategy(PathUrlStrategy());
   }
-  runApp(MyApp());
+  final apiService = ApiService();
+
+  runApp(
+    BlocProvider(
+      create: (context) =>
+          AuthBloc(apiService: apiService)..add(CheckAuthEvent()),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -94,7 +106,7 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/',
               name: 'home',
-              pageBuilder: (ctx, state) => NoTransitionPage(child: const HomePage()),
+              pageBuilder: (ctx, state) => NoTransitionPage(child: HomePage()),
             ),
             GoRoute(
               path: '/estoque',
