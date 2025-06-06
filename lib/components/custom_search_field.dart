@@ -5,7 +5,6 @@ class CustomSearchField extends StatelessWidget {
   final void Function(String)? onChanged;
   final double width;
   final double borderRadius;
-  final IconData icon;
   final Color fillColor;
   final BoxShadow? boxShadow;
 
@@ -15,7 +14,6 @@ class CustomSearchField extends StatelessWidget {
     this.onChanged,
     this.width = 250,
     this.borderRadius = 12,
-    this.icon = Icons.search,
     this.fillColor = Colors.white,
     this.boxShadow,
   });
@@ -29,9 +27,9 @@ class CustomSearchField extends StatelessWidget {
           boxShadow: [
             boxShadow ??
                 const BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.25),
-                  blurRadius: 12,
-                  offset: Offset(0, 6),
+                  color: Color.fromRGBO(0, 0, 0, 0.15),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
                 ),
           ],
         ),
@@ -39,7 +37,7 @@ class CustomSearchField extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: ' $hintText',
-            prefixIcon: Icon(icon),
+            prefixIcon: Icon(Icons.search),
             filled: true,
             fillColor: fillColor,
             border: OutlineInputBorder(

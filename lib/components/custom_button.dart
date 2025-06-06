@@ -70,6 +70,7 @@ class _CustomIconButtonState extends State<CustomButton> {
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 8),
           ),
         ),
+        elevation: const WidgetStatePropertyAll(3)
       ),
       onPressed: isLoading ? null : _handlePress,
       child: SizedBox(

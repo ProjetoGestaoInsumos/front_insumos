@@ -1,28 +1,19 @@
+// lib/layouts/main_layout.dart
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:front_insumos/components/side_bar.dart';
 import 'package:front_insumos/components/top_bar.dart';
-import 'package:front_insumos/screens/home_page.dart';
-import 'package:front_insumos/screens/stock_page.dart';
-import 'package:front_insumos/screens/history_page.dart';
-import 'package:front_insumos/screens/orders_page.dart';
 
-class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+class MainLayout extends StatelessWidget {
+  final int selectedIndex;
+  final Widget child;
 
-  @override
-  State<MainLayout> createState() => _MainLayoutState();
-}
-
-class _MainLayoutState extends State<MainLayout> {
-  int selectedPage = 0;
-
-  final List<Widget> pages = [
-    HomePage(),
-    StockPage(),
-    HistoryPage(),
-    OrdersPage(),
-    HomePage(),
-  ];
+  const MainLayout({
+    super.key,
+    required this.selectedIndex,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,20 +21,32 @@ class _MainLayoutState extends State<MainLayout> {
       body: Row(
         children: [
           Sidebar(
+            selectedIndex: selectedIndex,
             onItemSelected: (index) {
-              setState(() {
-                selectedPage = index;
-              });
+              switch (index) {
+                case 0:
+                  context.go('/');
+                  break;
+                case 1:
+                  context.go('/estoque');
+                  break;
+                case 2:
+                  context.go('/historico');
+                  break;
+                case 3:
+                  context.go('/pedidos');
+                  break;
+                case 4:
+                  context.go('/receitas');
+                  break;
+              }
             },
-            selectedIndex: selectedPage,
           ),
           Expanded(
             child: Column(
               children: [
                 const TopBar(),
-                Expanded(
-                  child: pages[selectedPage],
-                ),
+                Expanded(child: child),
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_insumos/main.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_state.dart';
 import 'register_page.dart';
@@ -23,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _errorMessage = null);
       print(
           'Tentativa de login com Email: ${_emailController.text.trim()}, Senha: ${_passwordController.text}');
-
+      authNotifier.value = true;
       Navigator.pushReplacementNamed(context, '/');
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/utils/colors.dart';
+import 'package:go_router/go_router.dart';
 //import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
@@ -58,15 +59,15 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                             children: [
                               Expanded(child: _buildCardVencidos(context)),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 50),
                               Expanded(child: _buildCardPedidos(context)),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 50),
                               Expanded(child: _buildCardMovimentacoes(context)),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 30),
 
                         // Botões inferiores
                         Row(
@@ -87,6 +88,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ),
@@ -185,13 +187,19 @@ class _HomePageState extends State<HomePage> {
     required String title,
     required Widget content,
     required String buttonRoute,
-    Color backgroundColor = Colors.white,
+    Color backgroundColor = CustomColors.grey,
     Color textColor = Colors.black,
     bool buttonIsWhite = false,
   }) {
     return Card(
       color: backgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: backgroundColor == CustomColors.grey
+            ? BorderSide(
+                color: Colors.black.withOpacity(0.1)) // borda preta fraca
+            : BorderSide.none,
+      ),
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -207,7 +215,7 @@ class _HomePageState extends State<HomePage> {
             Expanded(child: content),
             const SizedBox(height: 12),
             CustomButton(
-              onPressed: () async => {},
+              onPressed: () async => {context.go(buttonRoute)},
               text: "Ver",
               buttonColor:
                   buttonIsWhite ? CustomColors.grey : CustomColors.blue,
@@ -225,7 +233,7 @@ class _HomePageState extends State<HomePage> {
     Color color,
   ) {
     return CustomButton(
-      onPressed: () async => {},
+      onPressed: () async => {context.go(route)},
       text: label,
       buttonColor: color,
     );

@@ -4,9 +4,11 @@ import 'package:front_insumos/components/custom_pagination.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/components/orders_popup.dart';
 import 'package:front_insumos/utils/colors.dart';
+import 'package:go_router/go_router.dart';
 
 class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+  final bool abrirPop;
+  const OrdersPage({super.key, this.abrirPop = false});
 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
@@ -55,6 +57,11 @@ class _OrdersPageState extends State<OrdersPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (widget.abrirPop) {
+      showOrderPopup(context);
+    }
+  });
     _filteredOrders = List.from(_allOrders);
   }
 
@@ -106,21 +113,28 @@ Widget _buildCell(String text) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pedidos'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            const SizedBox(height: 24),
+            Text(
+        'Pedidos',
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        textAlign: TextAlign.center,
+      ),
+      const Divider(thickness: 1, color: Colors.grey),
+      const SizedBox(height: 8),
             // Linha de busca e botão
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
 
                 CustomSearchField(
-                  hintText: 'Buscar',
                   width: 250,
                   borderRadius: 12,
-                  icon: Icons.search,
                   onChanged: _filterOrders,
                 ),
 
@@ -140,9 +154,8 @@ Widget _buildCell(String text) {
            Expanded(
   child: SingleChildScrollView(
     scrollDirection: Axis.vertical,
-    child: Container(
+    child: SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Table(
         border: TableBorder(
           horizontalInside: BorderSide(
@@ -209,7 +222,7 @@ Widget _buildCell(String text) {
                 _buildCell(order['Cursos']!),
                 _buildCell(order['Detalhes']!),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(child: _getStatusIcon(order['Status']!)),
                 ),
               ],

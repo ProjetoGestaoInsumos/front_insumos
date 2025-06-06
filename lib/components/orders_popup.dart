@@ -7,15 +7,14 @@ void showOrderPopup(BuildContext context) {
   CustomPopup.show(
     context: context,
     title: "POP",
-    onClose: () => Navigator.of(context).pop(),
     showFooter: true,
     primaryButtonLabel: "Sim",
     secondaryButtonLabel: "Não",
     primaryButtonOnPressed: () async {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     },
     secondaryButtonOnPressed: () async {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
     },
     content: const OrderPopupContent(),
   );
@@ -28,7 +27,6 @@ void showAddItemPopup(BuildContext context) {
   CustomPopup.show(
     context: context,
     title: "Adicionar item extra",
-    onClose: () => Navigator.of(context).pop(),
     showFooter: true,
     primaryButtonLabel: "Sim",
     secondaryButtonLabel: "Não",
@@ -43,11 +41,11 @@ void showAddItemPopup(BuildContext context) {
       // print('Ingrediente: $selectedIngredient');
       // print('Unidade: ${unitController.text}');
 
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
       return;
     },
     secondaryButtonOnPressed: () async {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
       return;
     },
     content: StatefulBuilder(
@@ -57,27 +55,19 @@ void showAddItemPopup(BuildContext context) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Divider(thickness: 1),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Ingrediente', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text('Quantidade', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
-              ),
-              const SizedBox(height: 6),
               Row(
                 children: [
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
+                        labelText: 'Ingrediente',
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         border: OutlineInputBorder(),
                       ),
                       value: selectedIngredient,
-                      hint: const Text('Selecione'),
+                      hint: const Text('Selecione', style: TextStyle(fontSize: 14, color: Colors.grey)),
                       onChanged: (value) {
                         setState(() {
                           selectedIngredient = value;
@@ -99,17 +89,18 @@ void showAddItemPopup(BuildContext context) {
                     child: TextField(
                       controller: unitController,
                       decoration: const InputDecoration(
+                        labelText: 'Unidade',
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         border: OutlineInputBorder(),
                         hintText: 'Ex: 300 ml',
+                        hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              const Divider(thickness: 1),
             ],
           ),
         );
@@ -226,34 +217,37 @@ class OrderPopupContent extends StatelessWidget {
 static Widget _buildDateField(BuildContext context) {
   final TextEditingController controller = TextEditingController();
 
-  return TextField(
-    controller: controller,
-    decoration: const InputDecoration(
-      labelText: "Data",
-      suffixIcon: Icon(Icons.calendar_today),
-      labelStyle: TextStyle(fontSize: 14),
-      border: OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey),
+  return SizedBox(
+    height: 40,
+    child: TextField(
+      controller: controller,
+      decoration: const InputDecoration(
+        labelText: "Data",
+        suffixIcon: Icon(Icons.calendar_today, size: 20),
+        labelStyle: TextStyle(fontSize: 14),
+        border: OutlineInputBorder(),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: CustomColors.blue),
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: CustomColors.blue),
-      ),
+      readOnly: true,
+      onTap: () async {
+        final DateTime? pickedDate = await showDatePicker(
+          context: context,
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2100),
+          initialDate: DateTime.now(),
+        );
+    
+        if (pickedDate != null) {
+          controller.text =
+              "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+        }
+      },
     ),
-    readOnly: true,
-    onTap: () async {
-      final DateTime? pickedDate = await showDatePicker(
-        context: context,
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2100),
-        initialDate: DateTime.now(),
-      );
-
-      if (pickedDate != null) {
-        controller.text =
-            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
-      }
-    },
   );
 }
 
