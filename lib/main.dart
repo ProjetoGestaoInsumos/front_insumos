@@ -6,7 +6,7 @@ import 'package:front_insumos/layouts/main_layout.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
 import 'package:front_insumos/screens/auth/login_page.dart';
-import 'package:front_insumos/screens/history_page.dart';
+import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
 import 'package:front_insumos/screens/recipe_form_page.dart';
