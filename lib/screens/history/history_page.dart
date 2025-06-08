@@ -122,133 +122,136 @@ class _HistoryPageContentState extends State<HistoryPageContent> {
       ),
     );
   }
-
-  Widget buildDesktopTable(BuildContext context) {
-    return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SizedBox(
-          width: double.infinity,
-          child: Column(
-            children: [
-              Table(
-                border: TableBorder(
-                  horizontalInside: BorderSide(
-                    color: Colors.grey.shade400,
-                    width: 1,
-                  ),
+Widget buildDesktopTable(BuildContext context) {
+  return Expanded(
+    child: SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          children: [
+            Table(
+              border: TableBorder(
+                horizontalInside: BorderSide(
+                  color: Colors.grey.shade400,
+                  width: 1,
                 ),
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: [
+              ),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  decoration: const BoxDecoration(color: Color(0xFFE0E0E0)),
+                  children: [
+                    for (final header in [
+                      'MOVIMENTO',
+                      'INGREDIENTE',
+                      'QUANTIDADE',
+                      'DATA',
+                      'RESPONSÁVEL',
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            header,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (filteredMovements.isEmpty)
                   TableRow(
-                    decoration: const BoxDecoration(color: Color(0xFFE0E0E0)),
-                    children: [
-                      for (final header in [
-                        'MOVIMENTO',
-                        'INGREDIENTE',
-                        'QUANTIDADE',
-                        'DATA',
-                        'RESPONSÁVEL',
-                      ])
+                    children: List.generate(
+                      5,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: index == 2
+                              ? const Text(
+                                  'Nenhum registro encontrado',
+                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                )
+                              : const Text(''),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  for (var mov in currentPageItems)
+                    TableRow(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  (mov['type']?.toString().toLowerCase() == 'in')
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
+                                  color: (mov['type']?.toString().toLowerCase() == 'in')
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                                const SizedBox(width: 6),
+                                SizedBox(
+                                  width: 60,
+                                  child: Text(
+                                    (mov['type']?.toString().toLowerCase() == 'in')
+                                        ? 'Entrada'
+                                        : 'Saída',
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: Text(mov['item_name'] ?? '-')),
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: Text(
-                              header,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              mov['quantity'].toString(),
+                              style: TextStyle(
+                                color: (mov['type']?.toString().toLowerCase() == 'in')
+                                    ? Colors.green
+                                    : Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                  if (filteredMovements.isEmpty)
-                    TableRow(
-                      children: List.generate(
-                        5,
-                        (index) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
-                            child: index == 2
-                                ? const Text(
-                                    'Nenhum registro encontrado',
-                                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                                  )
-                                : const Text(''),
+                            child: Text(
+                              mov['created_at'].toString().split('T').first,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                  else
-                    for (var mov in currentPageItems)
-                      TableRow(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    (mov['type']?.toString().toLowerCase() == 'in')
-                                        ? Icons.arrow_upward
-                                        : Icons.arrow_downward,
-                                    color: (mov['type']?.toString().toLowerCase() == 'in')
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    (mov['type']?.toString().toLowerCase() == 'in')
-                                        ? 'Entrada'
-                                        : 'Saída',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: Text(mov['item_name'] ?? '-')),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Text(
-                                mov['quantity'].toString(),
-                                style: TextStyle(
-                                  color: (mov['type']?.toString().toLowerCase() == 'in')
-                                      ? Colors.green
-                                      : Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Text(
-                                mov['created_at'].toString().split('T').first,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: Text(mov['user_name'] ?? '-')),
-                          ),
-                        ],
-                      ),
-                ],
-              ),
-            ],
-          ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: Text(mov['user_name'] ?? '-')),
+                        ),
+                      ],
+                    ),
+              ],
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -264,9 +267,14 @@ class _HistoryPageContentState extends State<HistoryPageContent> {
           return Center(child: Text(state.message));
         }
 
-        if (state is HistoryLoaded) {
-          allMovements = state.movements;
-          filteredMovements = List<Map<String, dynamic>>.from(allMovements);
+if (state is HistoryLoaded) {
+  allMovements = state.movements;
+
+  // Só redefine os filtrados se estiver vazio (primeira carga)
+  if (filteredMovements.isEmpty) {
+    filteredMovements = List<Map<String, dynamic>>.from(allMovements);
+  }
+
 
           return Padding(
             padding: const EdgeInsets.all(16),
