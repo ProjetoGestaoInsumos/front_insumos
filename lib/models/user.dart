@@ -47,6 +47,10 @@ class User {
       'email': email,
       'role': roleToString(role),
     };
+
+    if (password != null) {
+      data['password'] = password!;
+    }
     return data;
   }
 }

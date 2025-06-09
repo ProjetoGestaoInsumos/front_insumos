@@ -1,5 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:front_insumos/api/api_service.dart';
+import 'package:front_insumos/models/user.dart';
 import 'package:go_router/go_router.dart';
+
+final ApiService _apiService = ApiService();
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,37 +18,85 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedUserType = 'technician'; // Default value
+  UserRole _selectedUserRole = UserRole.professor; // valor padrão
   String? _errorMessage;
+  bool _isSubmitting = false;
+  final List<UserRole> _userRoles = UserRole.values;
 
-  final List<Map<String, String>> _userTypes = [
-    {'value': 'technician', 'label': 'Técnico'},
-    {'value': 'teacher', 'label': 'Professor'},
-    {'value': 'admin', 'label': 'Administrador'},
-  ];
+  String _roleLabel(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'Administrador';
+      case UserRole.tecnico:
+        return 'Técnico';
+      case UserRole.professor:
+        return 'Professor';
+    }
+  }
 
-  void _submitRegister() {
-    setState(() => _errorMessage = null);
+  void _submitRegister() async {
+    if (_isSubmitting) return;
+
+    setState(() {
+      _errorMessage = null;
+      _isSubmitting = true;
+    });
 
     if (_formKey.currentState?.validate() ?? false) {
-      print('Tentativa de Cadastro com:');
-      print('Nome: ${_nameController.text.trim()}');
-      print('Email: ${_emailController.text.trim()}');
-      print('Senha: ${_passwordController.text}');
-      print('Tipo de Usuário: $_selectedUserType');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Cadastro simulado com sucesso! Redirecionando...'),
-            duration: Duration(seconds: 2)),
+      final user = User(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        role: _selectedUserRole,
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.pop(context);
+      try {
+        final response = await _apiService.register(user);
+
+        if (response != null &&
+            (response.statusCode == 200 || response.statusCode == 201)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cadastro realizado com sucesso!'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) context.go('/login');
+          });
+        } else {
+          final detail = response?.data['detail'];
+          setState(() {
+            if (detail is String) {
+              _errorMessage = detail;
+            } else if (detail is List &&
+                detail.isNotEmpty &&
+                detail[0]['msg'] != null) {
+              _errorMessage = detail[0]['msg'];
+            } else {
+              _errorMessage =
+                  'Erro ao registrar: ${response?.statusMessage ?? "desconhecido"}';
+            }
+          });
         }
-      });
-    } else {}
+      } catch (e) {
+        setState(() {
+          final response = e is DioException ? e.response : null;
+          final detail = response?.data['detail'];
+
+          if (detail is List && detail.isNotEmpty && detail[0]['msg'] != null) {
+            _errorMessage = detail[0]['msg'];
+          } else if (detail is String) {
+            _errorMessage = detail;
+          } else {
+            _errorMessage = 'Erro durante o cadastro.';
+          }
+        });
+      }
+    }
+
+    setState(() => _isSubmitting = false);
   }
 
   @override
@@ -118,8 +171,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty)
+                          if (value == null || value.trim().isEmpty) {
                             return 'Informe o nome';
+                          }
                           return null;
                         },
                       ),
@@ -146,11 +200,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Informe o email';
+                          }
                           if (!RegExp(
                                   r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                              .hasMatch(value)) return 'Email inválido';
+                              .hasMatch(value)) {
+                            return 'Email inválido';
+                          }
                           return null;
                         },
                       ),
@@ -177,16 +234,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         obscureText: true,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Informe a senha';
-                          if (value.length < 6)
-                            return 'Senha muito curta (mínimo 6 caracteres)';
+                          }
+                          if (value.length < 8) {
+                            return 'A senha deve ter no mínimo 8 caracteres';
+                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: _selectedUserType,
+                      DropdownButtonFormField<UserRole>(
+                        value: _selectedUserRole,
                         decoration: InputDecoration(
                           labelText: 'Tipo de Usuário',
                           prefixIcon: Icon(Icons.group_outlined,
@@ -204,22 +263,23 @@ class _RegisterPageState extends State<RegisterPage> {
                                 width: 2.0),
                           ),
                         ),
-                        items: _userTypes.map((type) {
-                          return DropdownMenuItem<String>(
-                            value: type['value'],
-                            child: Text(type['label']!),
+                        items: _userRoles.map((UserRole role) {
+                          return DropdownMenuItem<UserRole>(
+                            value: role,
+                            child: Text(_roleLabel(role)),
                           );
                         }).toList(),
-                        onChanged: (value) {
+                        onChanged: (UserRole? value) {
                           if (value != null) {
                             setState(() {
-                              _selectedUserType = value;
+                              _selectedUserRole = value;
                             });
                           }
                         },
                         validator: (value) {
-                          if (value == null)
+                          if (value == null) {
                             return 'Selecione o tipo de usuário';
+                          }
                           return null;
                         },
                       ),
@@ -235,7 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           textStyle: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.w600),
                         ),
-                        onPressed: _submitRegister,
+                        onPressed: _isSubmitting ? null : _submitRegister,
                         child: const Text('Cadastrar'),
                       ),
                       const SizedBox(height: 20),

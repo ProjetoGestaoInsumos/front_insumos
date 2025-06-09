@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_insumos/main.dart';
 import 'package:front_insumos/models/user.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_state.dart';
 import 'package:go_router/go_router.dart';
-import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -93,6 +91,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           TextFormField(
                             controller: _emailController,
+                            textInputAction: TextInputAction.next,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context).nextFocus();
+                            },
                             decoration: InputDecoration(
                               labelText: 'Email',
                               hintText: 'seu.email@exemplo.com', // Placeholder
@@ -114,17 +116,22 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Informe o email';
+                              }
                               if (!RegExp(
                                       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(value)) return 'Email inválido';
+                                  .hasMatch(value)) {
+                                return 'Email inválido';
+                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _passwordController,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _submit(),
                             decoration: InputDecoration(
                               labelText: 'Senha',
                               hintText: 'Sua senha',
@@ -146,8 +153,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             obscureText: true,
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Informe a senha';
+                              }
 
                               return null;
                             },

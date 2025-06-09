@@ -37,13 +37,13 @@ class ApiService {
           },
         ),
         data: {
-        'username': user.email,
-        'password': user.password,
-        'grant_type': 'password',
-        'scope': '',
-        'client_id': '',
-        'client_secret': '',
-      },
+          'username': user.email,
+          'password': user.password,
+          'grant_type': 'password',
+          'scope': '',
+          'client_id': '',
+          'client_secret': '',
+        },
       );
       return response;
     } catch (e) {
@@ -64,6 +64,14 @@ class ApiService {
         data: user.toJson(), // já inclui o password, se existir
       );
       return response;
+    } on DioException catch (e) {
+      // Se for erro vindo da API (400, 422, etc.), ainda queremos a resposta
+      if (e.response != null) {
+        return e.response;
+      } else {
+        print("Erro sem resposta do servidor: $e");
+        return null;
+      }
     } catch (e) {
       print("Erro no cadastro: $e");
       return null;
