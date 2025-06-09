@@ -1,20 +1,33 @@
 import 'package:dio/dio.dart';
+import 'package:front_insumos/models/user.dart';
 
 class ApiService {
   final Dio _dio = Dio();
   final String baseUrl = const String.fromEnvironment('BACKEND_URL');
 
-  Future<List<dynamic>> fetchProdutos() async {
+  Future<User?> getMe(String token) async {
     try {
-      final response = await _dio.get("$baseUrl/items/");
-      return response.data;
+      final response = await _dio.get(
+        "$baseUrl/auth/me",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        return User.fromJson(response.data);
+      }
+
+      return null;
     } catch (e) {
-      print("Erro ao buscar produtos: $e");
-      return [];
+      print("Erro ao buscar dados do usuário: $e");
+      return null;
     }
   }
 
-  Future<Response?> login(String email, String password) async {
+  Future<Response?> login(User user) async {
     try {
       final response = await _dio.post(
         "$baseUrl/auth/login",
@@ -24,9 +37,13 @@ class ApiService {
           },
         ),
         data: {
-          'email': email,
-          'password': password,
-        },
+        'username': user.email,
+        'password': user.password,
+        'grant_type': 'password',
+        'scope': '',
+        'client_id': '',
+        'client_secret': '',
+      },
       );
       return response;
     } catch (e) {
@@ -35,8 +52,7 @@ class ApiService {
     }
   }
 
-  Future<Response?> register(
-      String name, String email, String password, String userType) async {
+  Future<Response?> register(User user) async {
     try {
       final response = await _dio.post(
         "$baseUrl/auth/register",
@@ -45,12 +61,7 @@ class ApiService {
             "Content-Type": "application/json",
           },
         ),
-        data: {
-          'name': name,
-          'email': email,
-          'password': password,
-          'user_type': userType,
-        },
+        data: user.toJson(), // já inclui o password, se existir
       );
       return response;
     } catch (e) {
@@ -60,16 +71,67 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> fetchMovements() async {
-  try {
-    final response = await _dio.get("$baseUrl/movement");
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(response.data);
+    try {
+      final response = await _dio.get("$baseUrl/movement");
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Erro ao buscar movimentações: $e");
+      return [];
     }
-    return [];
-  } catch (e) {
-    print("Erro ao buscar movimentações: $e");
-    return [];
   }
-}
 
+  Future<List<Map<String, dynamic>>> fetchStocks() async {
+    try {
+      final response = await _dio.get("$baseUrl/stock");
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Erro ao buscar stock: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchItems() async {
+    try {
+      final response = await _dio.get("$baseUrl/items");
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Erro ao buscar items: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPOP() async {
+    try {
+      final response = await _dio.get("$baseUrl/pop");
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Erro ao buscar pop: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchRecipes() async {
+    try {
+      final response = await _dio.get("$baseUrl/recipe");
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Erro ao buscar recipes: $e");
+      return [];
+    }
+  }
 }

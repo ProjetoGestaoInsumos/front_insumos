@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -240,7 +241,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          context.go('/login');
                         },
                         child: const Text('Já tem conta? Faça login'),
                       )

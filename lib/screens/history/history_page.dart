@@ -8,26 +8,15 @@ import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_state.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 
-class HistoryPage extends StatelessWidget {
+
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HistoryBloc(apiService: ApiService())..add(FetchMovements()),
-      child: const HistoryPageContent(),
-    );
-  }
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class HistoryPageContent extends StatefulWidget {
-  const HistoryPageContent({super.key});
-
-  @override
-  State<HistoryPageContent> createState() => _HistoryPageContentState();
-}
-
-class _HistoryPageContentState extends State<HistoryPageContent> {
+class _HistoryPageState extends State<HistoryPage> {
   List<Map<String, dynamic>> allMovements = [];
   List<Map<String, dynamic>> filteredMovements = [];
   int rowsPerPage = 10;

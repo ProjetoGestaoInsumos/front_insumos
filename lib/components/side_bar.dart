@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:front_insumos/components/custom_popup.dart';
 import 'package:front_insumos/main.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
 import 'package:front_insumos/utils/colors.dart';
 
 class Sidebar extends StatefulWidget {
@@ -146,9 +149,8 @@ class _SidebarState extends State<Sidebar> {
                       primaryButtonLabel: "Sim",
                       primaryButtonOnPressed: () async {
                         authNotifier.value = false;
+                        context.read<AuthBloc>().add(LogoutEvent());
                         Navigator.of(context).pop(); // Fecha o popup
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/login', (route) => false);
                       },
                       secondaryButtonLabel: "Cancelar",
                       secondaryButtonOnPressed: () async {
