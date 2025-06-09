@@ -58,4 +58,18 @@ class ApiService {
       return null;
     }
   }
+
+  Future<List<Map<String, dynamic>>> fetchMovements() async {
+  try {
+    final response = await _dio.get("$baseUrl/movement");
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(response.data);
+    }
+    return [];
+  } catch (e) {
+    print("Erro ao buscar movimentações: $e");
+    return [];
+  }
+}
+
 }
