@@ -1,3 +1,5 @@
+import 'package:front_insumos/models/user.dart';
+
 class AuthState {}
 
 class AuthInitial extends AuthState {}
@@ -5,15 +7,11 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final String name;
-  final String email;
-  final String userType;
+  final User user;
   final String token;
 
   AuthAuthenticated({
-    required this.name,
-    required this.email,
-    required this.userType,
+    required this.user,
     required this.token,
   });
 }
@@ -25,3 +23,5 @@ class AuthError extends AuthState {
 
   AuthError(this.message);
 }
+
+class AuthChecking extends AuthState {}

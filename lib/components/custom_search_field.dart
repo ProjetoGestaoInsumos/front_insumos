@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_insumos/utils/colors.dart';
 
 class CustomSearchField extends StatelessWidget {
   final String hintText;
@@ -14,7 +15,7 @@ class CustomSearchField extends StatelessWidget {
     this.onChanged,
     this.width = 250,
     this.borderRadius = 12,
-    this.fillColor = Colors.white,
+    this.fillColor = CustomColors.white,
     this.boxShadow,
   });
 

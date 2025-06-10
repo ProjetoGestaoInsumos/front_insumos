@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_insumos/utils/colors.dart';
 
 class CustomPagination extends StatelessWidget {
   final int currentPage;
