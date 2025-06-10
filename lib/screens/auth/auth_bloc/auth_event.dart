@@ -1,12 +1,14 @@
+import 'package:front_insumos/models/user.dart';
+
 abstract class AuthEvent {}
 
 class CheckAuthEvent extends AuthEvent {}
 
 class LoginEvent extends AuthEvent {
-  final String email;
-  final String password;
+  final User user;
 
-  LoginEvent({required this.email, required this.password});
+  LoginEvent({required this.user});
 }
+
 
 class LogoutEvent extends AuthEvent {}

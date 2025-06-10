@@ -8,8 +8,8 @@ void showOrderPopup(BuildContext context) {
     context: context,
     title: "POP",
     showFooter: true,
-    primaryButtonLabel: "Sim",
-    secondaryButtonLabel: "Não",
+    primaryButtonLabel: "Enviar",
+    secondaryButtonLabel: "Cancelar",
     primaryButtonOnPressed: () async {
       Navigator.of(context, rootNavigator: true).pop();
     },

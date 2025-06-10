@@ -86,6 +86,7 @@ class _CustomPopupState extends State<CustomPopup> {
                   style: const TextStyle(
                     fontSize: 22,
                     color: Colors.black,
+                    fontWeight: FontWeight.bold,
                     fontFamily: 'Inter',
                   ),
                 ),

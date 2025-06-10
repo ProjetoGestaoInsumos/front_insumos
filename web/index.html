@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -24,15 +25,69 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="front_insumos">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" href="icons/panela.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>front_insumos</title>
   <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.2/lottie.min.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #custom-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #F5F5F7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #lottie-animation {
+      width: 300px;
+      height: 300px;
+    }
+  </style>
+
 </head>
+
+
 <body>
+  <!-- Splash screen com Lottie -->
+  <div id="custom-loader">
+    <div id="lottie-animation"></div>
+  </div>
+
+  <!-- Inicializa animação Lottie -->
+  <script>
+    lottie.loadAnimation({
+      container: document.getElementById('lottie-animation'),
+      renderer: 'canvas',
+      loop: true,
+      autoplay: true,
+      path: 'splash.json' // certifique-se que esse caminho existe
+    });
+
+    // Remove loader quando Flutter estiver pronto
+    window.addEventListener('flutter-first-frame', function () {
+      const loader = document.getElementById('custom-loader');
+      if (loader) loader.remove();
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

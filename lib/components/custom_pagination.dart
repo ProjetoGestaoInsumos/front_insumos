@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_insumos/utils/colors.dart';
 
 class CustomPagination extends StatelessWidget {
   final int currentPage;
@@ -25,9 +26,9 @@ class CustomPagination extends StatelessWidget {
               onPressed: () => onPageChanged(page),
               style: TextButton.styleFrom(
                 backgroundColor:
-                    page == currentPage ? Colors.blue : Colors.transparent,
+                    page == currentPage ? CustomColors.blue : Colors.transparent,
                 foregroundColor:
-                    page == currentPage ? Colors.white : Colors.blue,
+                    page == currentPage ? Colors.white : CustomColors.blue,
                 padding: EdgeInsets.symmetric(
                   horizontal: isMobile ? 8 : 12,
                   vertical: isMobile ? 6 : 10,

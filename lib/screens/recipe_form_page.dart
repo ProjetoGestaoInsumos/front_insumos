@@ -195,6 +195,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: CustomColors.white,
         title: Text(widget.recipe == null ? "Nova Receita" : "Editar Receita"),
       ),
       body: Form(

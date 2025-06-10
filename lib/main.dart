@@ -5,7 +5,11 @@ import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/layouts/main_layout.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_state.dart';
 import 'package:front_insumos/screens/auth/login_page.dart';
+import 'package:front_insumos/screens/auth/register_page.dart';
+import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
+import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
@@ -22,15 +26,37 @@ void main() {
   if (kIsWeb) {
     setUrlStrategy(PathUrlStrategy());
   }
-  final apiService = ApiService();
 
   runApp(
-    BlocProvider(
-      create: (context) =>
-          AuthBloc(apiService: apiService)..add(CheckAuthEvent()),
-      child: const MyApp(),
+    RepositoryProvider<ApiService>(
+      create: (_) => ApiService(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                AuthBloc(apiService: context.read<ApiService>())
+                  ..add(CheckAuthEvent()),
+          ),
+        ],
+        child: const AppWrapper(),
+      ),
     ),
   );
+}
+
+class AppWrapper extends StatelessWidget {
+  const AppWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) => previous != current,
+      listener: (context, state) {
+        authNotifier.value = state is AuthAuthenticated;
+      },
+      child: const MyApp(),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -47,15 +73,16 @@ class MyApp extends StatelessWidget {
       refreshListenable: authNotifier,
       redirect: (context, state) {
         final loggedIn = authNotifier.value;
-        final goingToLogin = state.uri.path == '/login';
+        final isLoggingIn = state.uri.path == '/login';
+        final isRegistering = state.uri.path == '/register';
 
         // Se não está logado e tentou acessar algo além de /login
-        if (!loggedIn && !goingToLogin) return '/login';
+        final isGoingToPrivate = !isLoggingIn && !isRegistering;
 
-        // Se está logado e tentou ir para o login
-        if (loggedIn && goingToLogin) return '/';
+        if (!loggedIn && isGoingToPrivate) return '/login';
+        if (loggedIn && (isLoggingIn || isRegistering)) return '/';
 
-        return null; // segue normalmente
+        return null;
       },
       routes: [
         GoRoute(
@@ -64,9 +91,7 @@ class MyApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/register',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('Página de Registro (exemplo)')),
-          ),
+          builder: (context, state) => const RegisterPage(),
         ),
         ShellRoute(
           navigatorKey: shellNavigatorKey,
@@ -108,8 +133,14 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/historico',
               name: 'historico',
-              pageBuilder: (ctx, state) =>
-                  NoTransitionPage(child: const HistoryPage()),
+              pageBuilder: (ctx, state) => NoTransitionPage(
+                child: BlocProvider(
+                  create: (context) =>
+                      HistoryBloc(apiService: context.read<ApiService>())
+                        ..add(FetchMovements()),
+                  child: const HistoryPage(),
+                ),
+              ),
             ),
             GoRoute(
               path: '/pedidos',
@@ -144,6 +175,7 @@ class MyApp extends StatelessWidget {
       title: 'Gestão de Insumos',
       theme: ThemeData(
         fontFamily: 'Poppins',
+        scaffoldBackgroundColor: CustomColors.white,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 14),
           bodyMedium: TextStyle(fontSize: 14),
