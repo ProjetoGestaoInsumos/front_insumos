@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: CustomColors.white,
       body: Column(
         children: [
           // Barra superior
@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
             .toList(),
       ),
       buttonRoute: '/pedidos',
-      backgroundColor: const Color(0xFF2E6FA4),
+      backgroundColor: CustomColors.blue,
       textColor: Colors.white,
       buttonIsWhite: true,
     );

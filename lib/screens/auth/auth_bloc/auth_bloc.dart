@@ -17,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onCheckAuth(
       CheckAuthEvent event, Emitter<AuthState> emit) async {
+    emit(AuthChecking());
     final token = await secureStorage.read(key: 'jwt');
     final name = await secureStorage.read(key: 'name');
     final email = await secureStorage.read(key: 'email');
@@ -50,8 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthError('Token ausente na resposta da API.'));
           return;
         }
-
-// Agora buscamos o usuário autenticado com esse token
+        // Agora buscamos o usuário autenticado com esse token
         final user = await apiService.getMe(token);
 
         if (user == null) {

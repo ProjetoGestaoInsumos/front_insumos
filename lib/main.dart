@@ -9,6 +9,7 @@ import 'package:front_insumos/screens/auth/auth_bloc/auth_state.dart';
 import 'package:front_insumos/screens/auth/login_page.dart';
 import 'package:front_insumos/screens/auth/register_page.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
+import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
@@ -25,21 +26,20 @@ void main() {
   if (kIsWeb) {
     setUrlStrategy(PathUrlStrategy());
   }
-  final apiService = ApiService();
 
   runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) =>
-              AuthBloc(apiService: apiService)..add(CheckAuthEvent()),
-        ),
-        BlocProvider(create: (_) => HistoryBloc(apiService: apiService)),
-        // Exemplos de outros blocs, que você pode implementar depois
-        // BlocProvider(create: (_) => StockBloc()),
-        // BlocProvider(create: (_) => ItemsBloc()),
-      ],
-      child: const AppWrapper(),
+    RepositoryProvider<ApiService>(
+      create: (_) => ApiService(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                AuthBloc(apiService: context.read<ApiService>())
+                  ..add(CheckAuthEvent()),
+          ),
+        ],
+        child: const AppWrapper(),
+      ),
     ),
   );
 }
@@ -133,8 +133,14 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/historico',
               name: 'historico',
-              pageBuilder: (ctx, state) =>
-                  NoTransitionPage(child: const HistoryPage()),
+              pageBuilder: (ctx, state) => NoTransitionPage(
+                child: BlocProvider(
+                  create: (context) =>
+                      HistoryBloc(apiService: context.read<ApiService>())
+                        ..add(FetchMovements()),
+                  child: const HistoryPage(),
+                ),
+              ),
             ),
             GoRoute(
               path: '/pedidos',
@@ -169,6 +175,7 @@ class MyApp extends StatelessWidget {
       title: 'Gestão de Insumos',
       theme: ThemeData(
         fontFamily: 'Poppins',
+        scaffoldBackgroundColor: CustomColors.white,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 14),
           bodyMedium: TextStyle(fontSize: 14),

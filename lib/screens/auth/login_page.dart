@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_insumos/components/loading_screen.dart';
 import 'package:front_insumos/models/user.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_event.dart';
@@ -42,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            context.go('/');
+            // context.go('/');
           } else if (state is AuthError) {
             setState(() => _errorMessage = state.message);
           }
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state is AuthLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingScreen());
             }
             return Center(
               child: Card(

@@ -109,7 +109,7 @@ class _SidebarState extends State<Sidebar> {
           ),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             child: Column(
               children: [
                 _sidebarActionItem(

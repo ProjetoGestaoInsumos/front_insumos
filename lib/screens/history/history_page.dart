@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
-import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/components/custom_pagination.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_state.dart';
-import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
+import 'package:front_insumos/utils/format.dart';
 
-
-class HistoryPage extends StatefulWidget {
+class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
 
   @override
-  State<HistoryPage> createState() => _HistoryPageState();
+  Widget build(BuildContext context) {
+    return const HistoryPageContent();
+  }
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class HistoryPageContent extends StatefulWidget {
+  const HistoryPageContent({super.key});
+
+  @override
+  State<HistoryPageContent> createState() => _HistoryPageContentState();
+}
+
+class _HistoryPageContentState extends State<HistoryPageContent> {
   List<Map<String, dynamic>> allMovements = [];
   List<Map<String, dynamic>> filteredMovements = [];
   int rowsPerPage = 10;
@@ -101,7 +108,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   const SizedBox(height: 8),
                   Text('Ingrediente: ${mov['item_name'] ?? '-'}'),
                   Text('Quantidade: ${mov['quantity']}'),
-                  Text('Data: ${mov['created_at'].toString().split('T').first}'),
+                  Text('Data: ${formatarDataHora(mov['created_at'])}'),
                   Text('Responsável: ${mov['user_name'] ?? '-'}'),
                 ],
               ),
@@ -222,9 +229,7 @@ Widget buildDesktopTable(BuildContext context) {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
-                            child: Text(
-                              mov['created_at'].toString().split('T').first,
-                            ),
+                            child: Text(formatarDataHora(mov['created_at'])),
                           ),
                         ),
                         Padding(
