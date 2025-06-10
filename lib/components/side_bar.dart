@@ -46,7 +46,7 @@ class _SidebarState extends State<Sidebar> {
               alignment: Alignment.center,
               heightFactor: 0.5, // ajuste para recortar a parte de cima e baixo
               child: SvgPicture.asset(
-                'images/unicesumar-logo.svg',
+                'assets/images/unicesumar-logo.svg',
                 height: 180,
                 fit: BoxFit.contain,
               ),
