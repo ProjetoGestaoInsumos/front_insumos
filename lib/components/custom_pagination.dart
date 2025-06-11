@@ -13,71 +13,88 @@ class CustomPagination extends StatelessWidget {
     required this.onPageChanged,
   });
 
-  List<Widget> _buildPaginationButtons(bool isMobile) {
-    List<Widget> buttons = [];
+List<Widget> _buildPaginationButtons(bool isMobile) {
+  List<Widget> buttons = [];
 
-    void addPageButton(int page) {
-      buttons.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: SizedBox(
-            height: isMobile ? 36 : 40,
-            child: TextButton(
-              onPressed: () => onPageChanged(page),
-              style: TextButton.styleFrom(
-                backgroundColor:
-                    page == currentPage ? CustomColors.blue : Colors.transparent,
-                foregroundColor:
-                    page == currentPage ? Colors.white : CustomColors.blue,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 8 : 12,
-                  vertical: isMobile ? 6 : 10,
-                ),
-                minimumSize: const Size(36, 36),
+  void addPageButton(int page) {
+    buttons.add(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: SizedBox(
+          height: isMobile ? 36 : 40,
+          child: TextButton(
+            onPressed: () => onPageChanged(page),
+            style: TextButton.styleFrom(
+              backgroundColor:
+                  page == currentPage ? Colors.blue : Colors.transparent,
+              foregroundColor:
+                  page == currentPage ? Colors.white : Colors.blue,
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 12,
+                vertical: isMobile ? 6 : 10,
               ),
-              child: Text((page + 1).toString()),
+              minimumSize: const Size(36, 36),
             ),
+            child: Text((page + 1).toString()),
           ),
         ),
-      );
-    }
-
-    Widget ellipsis() {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Align(
-          alignment: Alignment.center,
-          child: Text(
-            "...",
-            style: TextStyle(fontSize: isMobile ? 16 : 18),
-          ),
-        ),
-      );
-    }
-
-    if (totalPages <= 7) {
-      for (int i = 0; i < totalPages; i++) {
-        addPageButton(i);
-      }
-    } else {
-      addPageButton(0);
-
-      int startPage = (currentPage - 1).clamp(1, totalPages - 2);
-      int endPage = (currentPage + 1).clamp(1, totalPages - 2);
-
-      if (startPage > 1) buttons.add(ellipsis());
-
-      for (int i = startPage; i <= endPage; i++) {
-        addPageButton(i);
-      }
-
-      if (endPage < totalPages - 2) buttons.add(ellipsis());
-
-      addPageButton(totalPages - 1);
-    }
-
-    return buttons;
+      ),
+    );
   }
+
+  Widget ellipsis() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Align(
+        alignment: Alignment.center,
+        child: Text(
+          "...",
+          style: TextStyle(fontSize: isMobile ? 16 : 18),
+        ),
+      ),
+    );
+  }
+
+  if (totalPages <= 5) {
+    // Mostra todas as páginas diretamente
+    for (int i = 0; i < totalPages; i++) {
+      addPageButton(i);
+    }
+  } else {
+    // Mostra no máximo 5 páginas por vez com elipses
+    addPageButton(0); // Primeira página
+
+    int startPage = currentPage - 1;
+    int endPage = currentPage + 1;
+
+    if (startPage <= 1) {
+      startPage = 1;
+      endPage = 3;
+    } else if (endPage >= totalPages - 2) {
+      startPage = totalPages - 4;
+      endPage = totalPages - 2;
+    }
+
+    if (startPage > 1) {
+      buttons.add(ellipsis());
+    }
+
+    for (int i = startPage; i <= endPage; i++) {
+      if (i > 0 && i < totalPages - 1) {
+        addPageButton(i);
+      }
+    }
+
+    if (endPage < totalPages - 2) {
+      buttons.add(ellipsis());
+    }
+
+    addPageButton(totalPages - 1); // Última página
+  }
+
+  return buttons;
+}
+
 
   @override
   Widget build(BuildContext context) {
