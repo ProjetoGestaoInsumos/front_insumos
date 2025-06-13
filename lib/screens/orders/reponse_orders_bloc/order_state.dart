@@ -1,4 +1,4 @@
-import '/models/order_model.dart';
+import '../../../models/pop_response.dart';
 
 abstract class OrderState {}
 
@@ -12,21 +12,21 @@ class OrderError extends OrderState {
 }
 
 class OrderLoaded extends OrderState {
-  final List<OrderModel> allOrders;
-  final List<OrderModel> filteredOrders;
+  final List<POPResponse> allOrders;
+  final List<POPResponse> filteredOrders;
   final int currentPage;
   final int rowsPerPage;
 
   OrderLoaded({
     required this.allOrders,
-    List<OrderModel>? filteredOrders,
+    List<POPResponse>? filteredOrders,
     this.currentPage = 0,
     this.rowsPerPage = 10,
   }) : filteredOrders = filteredOrders ?? allOrders;
 
   OrderLoaded copyWith({
-    List<OrderModel>? allOrders,
-    List<OrderModel>? filteredOrders,
+    List<POPResponse>? allOrders,
+    List<POPResponse>? filteredOrders,
     int? currentPage,
     int? rowsPerPage,
   }) {
@@ -38,9 +38,10 @@ class OrderLoaded extends OrderState {
     );
   }
 
-  int get totalPages => (filteredOrders.length / rowsPerPage).ceil();
+  int get totalPages =>
+      (filteredOrders.length / rowsPerPage).ceil();
 
-  List<OrderModel> get paginatedOrders {
+  List<POPResponse> get paginatedOrders {
     final start = currentPage * rowsPerPage;
     return filteredOrders.skip(start).take(rowsPerPage).toList();
   }

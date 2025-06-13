@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/components/custom_pagination.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/screens/orders/orders_popup.dart';
 import 'package:front_insumos/utils/colors.dart';
-import 'orders_bloc/order_bloc.dart';
-import 'orders_bloc/order_event.dart';
-import 'orders_bloc/order_state.dart';
-import '/models/order_model.dart';
+import 'reponse_orders_bloc/order_bloc.dart';
+import 'reponse_orders_bloc/order_event.dart';
+import 'reponse_orders_bloc/order_state.dart';
 import '/api/api_service.dart';
 
 class OrdersPage extends StatefulWidget {
@@ -186,7 +186,7 @@ class _OrdersPageState extends State<OrdersPage> {
                                   children: [
                                     _buildCell(order.id.toString()),           // 'numero' → order.id
                                     _buildCell(order.docenteNome),             // 'solicitante' → order.docenteNome
-                                    _buildCell(order.date),                     // 'data' → order.date
+                                    _buildCell(DateFormat('dd/MM/yyyy').format(order.date)), // formata para "13/06/2025" 
                                     _buildCell(order.recipeName),               // 'receita' → order.recipeName
                                     _buildCell(order.nStudents.toString()),    // 'quantidade' → order.nStudents
                                     _buildCell(order.curso),                    // 'cursos' → order.curso
