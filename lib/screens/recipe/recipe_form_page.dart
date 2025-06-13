@@ -3,13 +3,16 @@ import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/components/custom_popup.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:flutter/foundation.dart';
-import 'package:image_picker/image_picker.dart'; // Importação necessária
-import 'dart:io'; // Importação necessária para File
+import 'package:image_picker/image_picker.dart';
+import 'package:front_insumos/models/recipe.dart';
+import 'package:front_insumos/models/item.dart';
+import 'dart:io';
+import 'package:front_insumos/api/api_service.dart';
 
 class RecipeFormPage extends StatefulWidget {
-  final Map<String, dynamic>? recipe; // Nulo para criação, não nulo para edição
-
-  const RecipeFormPage({super.key, this.recipe});
+  final Map<String, dynamic>? recipe;
+  final Function(Recipe)? onRecipeCreated;
+  const RecipeFormPage({super.key, this.recipe, this.onRecipeCreated});
 
   @override
   _RecipeFormPageState createState() => _RecipeFormPageState();
@@ -22,39 +25,23 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   final TextEditingController _ingredientQuantityController =
       TextEditingController();
 
-  List<dynamic> _ingredients = []; // Ingredientes da receita atual
-  List<dynamic> _availableItems = []; // Todos os itens disponíveis do backend
-  dynamic _selectedIngredientItem; // Item selecionado no popup de ingrediente
+  List<dynamic> _ingredients = [];
+  List<dynamic> _availableItems = [];
+  Map<String, dynamic>? _selectedIngredientItem;
 
   bool _isLoadingItems = false;
   bool _isSaving = false;
+  File? _selectedImage;
 
-  File?
-      _selectedImage; // Adicione esta linha para armazenar a imagem selecionada
+  final ApiService apiService = ApiService();
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.recipe != null) {
-      _nameController.text = widget.recipe!['name'] ?? '';
-      _descriptionController.text = widget.recipe!['description'] ?? '';
-      _ingredients = List.from(widget.recipe!['ingredients'] ?? []);
-      if (widget.recipe!['imageUrl'] != null &&
-          widget.recipe!['imageUrl'].isNotEmpty) {
-        if (!widget.recipe!['imageUrl'].startsWith('http')) {
-          _selectedImage = File(widget.recipe!['imageUrl']);
-        }
-      }
+  Map<String, dynamic>? _findItemById(int? id) {
+    if (id == null) return null;
+    try {
+      return _availableItems.firstWhere((item) => item['id'] == id);
+    } catch (e) {
+      return null;
     }
-    _fetchAvailableItems();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _ingredientQuantityController.dispose();
-    super.dispose();
   }
 
   Future<void> _fetchAvailableItems() async {
@@ -62,29 +49,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
       _isLoadingItems = true;
     });
     try {
-      // COMENTE OU REMOVA A LINHA ABAIXO PARA USAR OS INGREDIENTES HARDCODED
-      // _availableItems = await apiService.fetchProdutos(); // Busca os itens disponíveis
-
-      // ADICIONE ESTAS OPÇÕES DE INGREDIENTES PARA TESTE
-      _availableItems = [
-        {'id': 'ing_1', 'name': 'Farinha de Trigo', 'unit': 'g'},
-        {'id': 'ing_2', 'name': 'Açúcar', 'unit': 'g'},
-        {'id': 'ing_3', 'name': 'Ovos', 'unit': 'unidade(s)'},
-        {'id': 'ing_4', 'name': 'Leite', 'unit': 'ml'},
-        {'id': 'ing_5', 'name': 'Manteiga', 'unit': 'g'},
-        {'id': 'ing_6', 'name': 'Sal', 'unit': 'g'},
-        {'id': 'ing_7', 'name': 'Pimenta do Reino', 'unit': 'g'},
-        {'id': 'ing_8', 'name': 'Cebola', 'unit': 'unidade(s)'},
-        {'id': 'ing_9', 'name': 'Alho', 'unit': 'dente(s)'},
-        {'id': 'ing_10', 'name': 'Tomate', 'unit': 'unidade(s)'},
-        {'id': 'ing_11', 'name': 'Frango', 'unit': 'g'},
-        {'id': 'ing_12', 'name': 'Carne Bovina', 'unit': 'g'},
-        {'id': 'ing_13', 'name': 'Macarrão', 'unit': 'g'},
-        {'id': 'ing_14', 'name': 'Queijo Parmesão', 'unit': 'g'},
-        {'id': 'ing_15', 'name': 'Azeite', 'unit': 'ml'},
-      ];
-
-      debugPrint('Available items fetched (hardcoded): $_availableItems');
+      List<Item> items = await apiService.fetchItems();
+      _availableItems = items.map((item) => item.toJson()).toList();
     } catch (e) {
       debugPrint('Erro ao buscar itens disponíveis: $e');
       if (mounted) {
@@ -99,7 +65,54 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
     }
   }
 
-  // Função para selecionar a imagem
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController.text = widget.recipe?['name'] ?? '';
+    _descriptionController.text = widget.recipe?['description'] ?? '';
+
+    // Initialize _ingredients to an empty list if creating a new recipe
+    _ingredients = widget.recipe != null ? [] : [];
+
+    _loadItemsAndMapIngredients();
+
+    if (widget.recipe?['imageUrl'] != null &&
+        widget.recipe!['imageUrl'].isNotEmpty) {
+      if (!widget.recipe!['imageUrl'].startsWith('http')) {
+        _selectedImage = File(widget.recipe!['imageUrl']);
+      }
+    }
+  }
+
+  Future<void> _loadItemsAndMapIngredients() async {
+    await _fetchAvailableItems();
+
+    if (widget.recipe != null) {
+      var rawIngredients = widget.recipe!['ingredients'] ?? [];
+      setState(() {
+        _ingredients = rawIngredients.map((ing) {
+          // Ensure that item_id is present and valid
+          return {
+            'item':
+                _findItemById(ing['item_id']), // Use item_id to find the item
+            'quantity':
+                ing['quantity'] ?? 0, // Default to 0 if quantity is null
+            'item_id': ing['item_id'] ?? 0, // Store item_id for later use
+          };
+        }).toList();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _ingredientQuantityController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -126,15 +139,34 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
       return;
     }
 
-    setState(() {
-      _ingredients.add({
-        'item': _selectedIngredientItem,
-        'quantity': double.parse(_ingredientQuantityController.text),
+    double newQuantity = double.parse(_ingredientQuantityController.text);
+    int selectedItemId = _selectedIngredientItem!['id'];
+
+    // Check if the ingredient already exists
+    int existingIndex = _ingredients
+        .indexWhere((ingredient) => ingredient['item_id'] == selectedItemId);
+
+    if (existingIndex != -1) {
+      // If it exists, update the quantity
+      setState(() {
+        _ingredients[existingIndex]['quantity'] =
+            newQuantity; // Update the quantity
       });
-      _selectedIngredientItem = null;
-      _ingredientQuantityController.clear();
-    });
-    Navigator.of(context, rootNavigator: true).pop(); // Fecha o popup
+    } else {
+      // If it doesn't exist, add it as a new ingredient
+      setState(() {
+        _ingredients.add({
+          'item': _selectedIngredientItem,
+          'item_id': selectedItemId,
+          'quantity': newQuantity,
+        });
+      });
+    }
+
+    // Clear the selection and input field
+    _selectedIngredientItem = null;
+    _ingredientQuantityController.clear();
+    Navigator.of(context, rootNavigator: true).pop();
   }
 
   void _removeIngredient(int index) {
@@ -148,42 +180,50 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
       return;
     }
 
+    // Check if editing and ensure at least one ingredient is present
+    if (widget.recipe != null && _ingredients.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('É necessário adicionar pelo menos um ingrediente.')),
+      );
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
 
-    final recipeData = {
-      'name': _nameController.text,
-      'description': _descriptionController.text,
-      'ingredients': _ingredients
-          .map(
-            (ing) => {
-              'item_id': ing['item']['id'],
-              'quantity': ing['quantity'],
-            },
-          )
-          .toList(),
-      'imageUrl':
-          _selectedImage?.path ?? '', // Adicione o caminho da imagem aqui
-    };
+    List<RecipeIngredient> ingredients = _ingredients.map((ing) {
+      return RecipeIngredient(
+        itemId: ing['item_id'],
+        quantity: ing['quantity'],
+      );
+    }).toList();
+
+    Recipe recipe = Recipe(
+      id: widget.recipe != null ? widget.recipe!['id'] as int? : null,
+      name: _nameController.text,
+      description: _descriptionController.text,
+      ingredients: ingredients,
+    );
 
     try {
       if (widget.recipe == null) {
-        // await apiService.createRecipe(recipeData);
+        await apiService.createRecipe(recipe);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receita criada com sucesso!')),
-        );
+            const SnackBar(content: Text('Receita criada com sucesso!')));
       } else {
-        // await apiService.updateRecipe(widget.recipe!['id'], recipeData);
+        await apiService.updateRecipe(recipe);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receita atualizada com sucesso!')),
-        );
+            const SnackBar(content: Text('Receita atualizada com sucesso!')));
       }
-      Navigator.of(context).pop(); // Voltar para a lista de receitas
+      Navigator.of(context).pop();
+      if (widget.onRecipeCreated != null) {
+        widget.onRecipeCreated!(recipe);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao salvar receita: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Erro ao salvar receita: $e')));
     } finally {
       setState(() {
         _isSaving = false;
@@ -255,7 +295,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                 const SizedBox(height: 8),
                 Center(
                   child: IntrinsicWidth(
-                    // <-- Alteração aplicada aqui
                     child: CustomButton(
                       text: "Selecionar Imagem",
                       buttonColor: CustomColors.blue,
@@ -275,7 +314,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                       border: OutlineInputBorder(),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: Colors.grey, // borda padrão
+                          color: Colors.grey,
                           width: 1.0,
                         ),
                       ),
@@ -298,20 +337,17 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                     border: OutlineInputBorder(),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: Colors.grey, // borda padrão
+                        color: Colors.grey,
                         width: 1.0,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                // --- AQUI É ONDE A MUDANÇA SERÁ APLICADA ---
                 Align(
                   alignment: Alignment.center,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 700,
-                    ), // Adjust maxWidth as needed
+                    constraints: const BoxConstraints(maxWidth: 700),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -326,31 +362,33 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                           text: "Adicionar Ingrediente",
                           buttonColor: CustomColors.blue,
                           onPressed: () async {
-                            _selectedIngredientItem = null; // Reseta a seleção
-                            _ingredientQuantityController
-                                .clear(); // Limpa a quantidade
+                            _selectedIngredientItem = null;
+                            _ingredientQuantityController.clear();
                             CustomPopup.show(
                               context: context,
                               title: "Adicionar Ingrediente",
                               content: StatefulBuilder(
-                                builder: (
-                                  BuildContext context,
-                                  StateSetter setStatePopup,
-                                ) {
+                                builder: (BuildContext context,
+                                    StateSetter setStatePopup) {
                                   return Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (_isLoadingItems)
                                         const CircularProgressIndicator()
                                       else
-                                        DropdownButtonFormField<dynamic>(
+                                        DropdownButtonFormField<
+                                            Map<String, dynamic>>(
                                           decoration: const InputDecoration(
                                             labelText: 'Selecionar Ingrediente',
                                             border: OutlineInputBorder(),
                                           ),
                                           value: _selectedIngredientItem,
-                                          items: _availableItems.map((item) {
-                                            return DropdownMenuItem<dynamic>(
+                                          items: _availableItems.map<
+                                                  DropdownMenuItem<
+                                                      Map<String, dynamic>>>(
+                                              (item) {
+                                            return DropdownMenuItem<
+                                                Map<String, dynamic>>(
                                               value: item,
                                               child: Text(item['name']),
                                             );
@@ -362,8 +400,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                             });
                                           },
                                           hint: const Text(
-                                            "Selecione um ingrediente",
-                                          ),
+                                              "Selecione um ingrediente"),
                                         ),
                                       const SizedBox(height: 10),
                                       TextFormField(
@@ -375,7 +412,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                           border: const OutlineInputBorder(),
                                           suffixText:
                                               _selectedIngredientItem != null
-                                                  ? _selectedIngredientItem[
+                                                  ? _selectedIngredientItem![
                                                           'unit'] ??
                                                       ''
                                                   : '',
@@ -385,10 +422,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   );
                                 },
                               ),
-                              onClose: () => Navigator.of(
-                                context,
-                                rootNavigator: true,
-                              ).pop(),
+                              onClose: () =>
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop(),
                               showFooter: true,
                               primaryButtonLabel: "Adicionar",
                               primaryButtonOnPressed: () async {
@@ -396,10 +432,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                               },
                               secondaryButtonLabel: "Cancelar",
                               secondaryButtonOnPressed: () async {
-                                Navigator.of(
-                                  context,
-                                  rootNavigator: true,
-                                ).pop();
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
                               },
                             );
                           },
@@ -408,7 +442,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                     ),
                   ),
                 ),
-                // --- FIM DA MUDANÇA ---
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.center,
@@ -417,15 +450,14 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                     child: _ingredients.isEmpty
                         ? const Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              "Nenhum ingrediente adicionado ainda.",
-                            ),
+                            child: Text("Nenhum ingrediente adicionado ainda."),
                           )
                         : Table(
                             columnWidths: const {
                               0: FlexColumnWidth(2),
                               1: FlexColumnWidth(1),
                               2: FlexColumnWidth(1),
+                              3: FlexColumnWidth(0.5), // For the remove button
                             },
                             border: TableBorder.symmetric(
                               inside: BorderSide(
@@ -434,59 +466,83 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                               ),
                             ),
                             children: [
-                              // Cabeçalho
                               const TableRow(
                                 decoration: BoxDecoration(
                                   color: Color(0xFFEFEFEF),
                                 ),
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Ingredientes',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Ingredientes',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )),
                                   Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Quantidade',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Quantidade',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )),
                                   Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Unidade',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Unidade',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )),
+                                  Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Ação',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )), // Header for action
                                 ],
                               ),
-                              // Linhas dinâmicas com dados
-                              ..._ingredients.map((ingredient) {
+                              ..._ingredients.asMap().entries.map((entry) {
+                                int index = entry.key;
+                                var ingredient = entry.value;
+                                int itemId = ingredient[
+                                    'item_id']; // Use the stored item_id
+
+                                var item = _findItemById(itemId);
+
                                 return TableRow(
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text(ingredient['item']['name']),
+                                      child: Text(item != null
+                                          ? (item['name'] ??
+                                              'Nome não disponível')
+                                          : 'Item não encontrado'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        ingredient['quantity'].toString(),
-                                      ),
+                                          ingredient['quantity'].toString()),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        ingredient['item']['unit'] ?? '',
+                                      child: Text(item != null
+                                          ? (item['unit'] ??
+                                              'Unidade não disponível')
+                                          : ''),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () {
+                                          _removeIngredient(
+                                              index); // Call the remove function
+                                        },
                                       ),
                                     ),
                                   ],
