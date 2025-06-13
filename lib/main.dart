@@ -43,6 +43,16 @@ void main() {
                 secureStorage: FlutterSecureStorage())
               ..add(CheckAuthEvent()),
           ),
+          BlocProvider<StockBloc>(
+            create: (context) =>
+                StockBloc(apiService: context.read<ApiService>())
+                  ..add(LoadStockEvent()),
+          ),
+          BlocProvider<ItemBloc>(
+            create: (context) =>
+                ItemBloc(apiService: context.read<ApiService>())
+                  ..add(LoadItemEvent()),
+          ),
         ],
         child: const AppWrapper(),
       ),
@@ -145,8 +155,8 @@ class MyApp extends StatelessWidget {
                             ..add(LoadItemEvent()),
                     ),
                   ],
-                  child: StockPage(
-                    abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
+                child: StockPage(
+                  abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
                   ),
                 ),
               ),
