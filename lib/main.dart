@@ -12,7 +12,7 @@ import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
-import 'package:front_insumos/screens/orders_page.dart';
+import 'package:front_insumos/screens/orders/orders_page.dart';
 import 'package:front_insumos/screens/recipe_form_page.dart';
 import 'package:front_insumos/screens/recipes_page.dart';
 import 'package:front_insumos/screens/stock_page.dart';
