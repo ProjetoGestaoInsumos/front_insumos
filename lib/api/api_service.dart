@@ -3,8 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
-import 'package:front_insumos/models/pop_response.dart';
-import 'package:front_insumos/models/pop_create.dart';
+import 'package:front_insumos/models/pop.dart';
 
 class ApiService {
   final Dio _dio = Dio();
@@ -221,7 +220,7 @@ class ApiService {
 
   // 🔹 POP -------------------------------
 
-Future<POPResponse> createPop(POPCreate popData) async {
+Future<POP> createPop(POP popData) async {
   try {
     final response = await Dio().post(
       '$baseUrl/pop',
@@ -229,7 +228,7 @@ Future<POPResponse> createPop(POPCreate popData) async {
     );
 
     if (response.statusCode == 200) {
-      return POPResponse.fromJson(response.data);
+      return POP.fromJson(response.data);
     } else {
       throw Exception('Erro ao criar POP: Status ${response.statusCode}');
     }
@@ -240,13 +239,14 @@ Future<POPResponse> createPop(POPCreate popData) async {
 }
 
 
-Future<List<POPResponse>> fetchPopResponses(String baseUrl) async {
+Future<List<POP>> fetchPopResponses() async {
   try {
     final response = await Dio().get('$baseUrl/pop');
+    
     if (response.statusCode == 200) {
-      // Mapeia a resposta JSON para uma lista de POPResponse
-      return List<POPResponse>.from(
-        response.data.map((x) => POPResponse.fromJson(x)),
+      // Mapeia a resposta JSON para uma lista de POP
+      return List<POP>.from(
+        response.data.map((x) => POP.fromJson(x)),
       );
     }
     return [];

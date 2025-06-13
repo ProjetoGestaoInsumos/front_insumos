@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/components/custom_popup.dart';
+import 'package:front_insumos/models/pop.dart';
+import 'package:front_insumos/models/recipe.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_bloc.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_event.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:front_insumos/components/custom_button.dart';
 
@@ -110,8 +116,83 @@ void showAddItemPopup(BuildContext context) {
 }
 
 
-class OrderPopupContent extends StatelessWidget {
+class OrderPopupContent extends StatefulWidget {
   const OrderPopupContent({super.key});
+
+  @override
+  _OrderPopupContentState createState() => _OrderPopupContentState();
+}
+
+class _OrderPopupContentState extends State<OrderPopupContent> {
+  final TextEditingController cursoController = TextEditingController();
+  final TextEditingController docenteController = TextEditingController();
+  final TextEditingController disciplinaController = TextEditingController();
+  final TextEditingController alunosController = TextEditingController();
+  final TextEditingController gruposController = TextEditingController();
+  final TextEditingController objectiveController = TextEditingController();
+
+  String? selectedTurno;
+  String? selectedProtocolo;
+  String? selectedReceita;
+  StatusEnum? selectedStatus;
+
+  late List<Recipe> recipes;  // Lista de receitas
+
+  @override
+  void initState() {
+    super.initState();
+    // Carregar as receitas da API
+    _loadRecipes();
+  }
+
+  Future<void> _loadRecipes() async {
+    try {
+      final recipes = await ApiService().fetchRecipes();
+      setState(() {
+        this.recipes = recipes;
+      });
+    } catch (e) {
+      print("Erro ao carregar receitas: $e");
+    }
+  }
+
+  void _submit() {
+    if (cursoController.text.isEmpty ||
+        docenteController.text.isEmpty ||
+        disciplinaController.text.isEmpty ||
+        alunosController.text.isEmpty ||
+        gruposController.text.isEmpty ||
+        objectiveController.text.isEmpty ||
+        selectedTurno == null ||
+        selectedProtocolo == null ||
+        selectedReceita == null ||
+        selectedStatus == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos')),
+      );
+      return;
+    }
+
+    final newPop = POP(
+      recipeId: recipes.firstWhere((r) => r.name == selectedReceita).id,
+      docenteId: 1,  // Ajustar conforme necessário
+      docenteNome: docenteController.text,
+      recipeName: selectedReceita!,
+      curso: cursoController.text,
+      disciplina: disciplinaController.text,
+      protocolo: selectedProtocolo!,
+      turno: TurnoEnum.values.firstWhere((e) => e.toString() == 'TurnoEnum.$selectedTurno'),
+      date: DateTime.now(),
+      nStudents: int.parse(alunosController.text),
+      nGroups: int.parse(gruposController.text),
+      objective: objectiveController.text.isEmpty ? null : objectiveController.text,
+      items: [], // Adicione itens conforme necessário
+      status: selectedStatus!,
+    );
+
+    // Envia o evento para o BLoC criar o POP
+    context.read<POPBloc>().add(CreatePOP(newPop));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,233 +202,106 @@ class OrderPopupContent extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _buildTextField("Curso")),
+              Expanded(child: _buildTextField("Curso", controller: cursoController)),
               const SizedBox(width: 16),
-              Expanded(child: _buildTextField("Docente")),
+              Expanded(child: _buildTextField("Docente", controller: docenteController)),
             ],
           ),
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(
-                flex: 19,
-                child: _buildTextField("Disciplina"),
-              ),
+              Expanded(child: _buildTextField("Disciplina", controller: disciplinaController)),
               const SizedBox(width: 16),
-              Expanded(
-                flex: 9,
-                child: _buildTextField("Alunos"),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 9,
-                child: _buildTextField("Grupos"),
-              ),
+              Expanded(child: _buildTextField("Alunos", controller: alunosController)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildTextField("Grupos", controller: gruposController)),
             ],
           ),
-    
-    
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _buildDateField(context)),
+              Expanded(child: _buildDropdown("Turno", ["Manhã", "Tarde", "Noite"], (value) {
+                setState(() {
+                  selectedTurno = value;
+                });
+              })),
               const SizedBox(width: 16),
-              Expanded(child: _buildDropdown("Turno", ["Manhã", "Tarde", "Noite"])),
+              Expanded(child: _buildDropdown("Protocolo", ["Padrão", "Outro"], (value) {
+                setState(() {
+                  selectedProtocolo = value;
+                });
+              })),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _buildDropdown("Protocolo", ["Padrão", "Outro"])),
-              const SizedBox(width: 16),
-              Expanded(child: _buildDropdown("Receita", ["Receita 1", "Receita 2"])),
+              Expanded(child: _buildDropdown("Receita", recipes.map((r) => r.name).toList(), (value) {
+                setState(() {
+                  selectedReceita = value;
+                });
+              })),
             ],
           ),
-          const SizedBox(height: 10),
-          _buildTextField("Objetivo", height: 80, maxLines: 3, expand: true),
-          const SizedBox(height: 10),
-       Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomButton(
-            onPressed:() async  {
-              showAddItemPopup(context);
-              return;
-            },
-            iconData: Icons.add,
-            text: "Adicionar Item Extra",
-            buttonColor:CustomColors.white,
-            iconColor: Colors.black,
-          ),
-        ],
-      ),
-          const SizedBox(height: 10),
-          _buildSummaryTable(),
+          const SizedBox(height: 14),
+          _buildTextField("Objetivo", controller: objectiveController, height: 80, maxLines: 3),
           const SizedBox(height: 20),
+          CustomButton(
+            onPressed: _submit,
+            iconData: Icons.send,
+            text: "Enviar",
+            buttonColor: CustomColors.blue,
+            iconColor: Colors.white,
+          ),
         ],
       ),
     );
   }
 
-  // ===============================
-  // Widgets Auxiliares
-  // ===============================
-
-  static Widget _buildTextField(String label, {double height = 40, int maxLines = 1, bool expand = false}) {
+  static Widget _buildTextField(String label, {TextEditingController? controller, double height = 40, int maxLines = 1}) {
     return SizedBox(
       height: height,
-      width: expand ? double.infinity : 230,
       child: TextField(
+        controller: controller,
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(fontSize: 14),
           border: const OutlineInputBorder(),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: CustomColors.blue),
-          ),
         ),
       ),
     );
   }
 
-static Widget _buildDateField(BuildContext context) {
-  final TextEditingController controller = TextEditingController();
+  static Widget _buildDropdown(String label, List<String> items, Function(String?) onChanged) {
+    String? selectedItem;
 
-  return SizedBox(
-    height: 40,
-    child: TextField(
-      controller: controller,
-      decoration: const InputDecoration(
-        labelText: "Data",
-        suffixIcon: Icon(Icons.calendar_today, size: 20),
-        labelStyle: TextStyle(fontSize: 14),
-        border: OutlineInputBorder(),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: CustomColors.blue),
-        ),
-      ),
-      readOnly: true,
-      onTap: () async {
-        final DateTime? pickedDate = await showDatePicker(
-          context: context,
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2100),
-          initialDate: DateTime.now(),
-        );
-    
-        if (pickedDate != null) {
-          controller.text =
-              "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
-        }
-      },
-    ),
-  );
-}
-
-
-static Widget _buildDropdown(String label, List<String> items) {
-  String? selectedItem;
-
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(fontSize: 14),
-          isDense: true,
-          border: const OutlineInputBorder(),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(fontSize: 14),
+            isDense: true,
+            border: const OutlineInputBorder(),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: CustomColors.blue),
-          ),
-        ),
-        value: selectedItem,
-        onChanged: (value) {
-          setState(() {
-            selectedItem = value;
-          });
-        },
-        items: items
-            .map(
-              (item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ),
-            )
-            .toList(),
-      );
-    },
-  );
-}
-
-
-  static Widget _buildSummaryTable() {
-    return SizedBox(
-      height: 100, 
-      child: SingleChildScrollView(
-        child: Table(
-          border: TableBorder.all(borderRadius: BorderRadius.circular(10),color: Colors.black26),
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(),
-            2: FlexColumnWidth(),
-            3: FlexColumnWidth(),
+          value: selectedItem,
+          onChanged: (value) {
+            setState(() {
+              selectedItem = value;
+            });
+            onChanged(value);
           },
-          children: [
-            _buildTableHeader(),
-            _buildTableRow("Farinha", "3 kg", "1 kg", "2 kg"),
-            _buildTableRow("Carne Moída", "1,5 kg", "1,5 kg", "0 kg"),
-            _buildTableRow("Ovo", "1 unid", "3 unid", "0 unid"),
-            _buildTableRow("Leite [Extra]", "300 ml", "100 ml", "200 ml"),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static TableRow _buildTableHeader() {
-    return TableRow(
-      decoration: const BoxDecoration(color: Color(0xFFEFEFEF)),
-      children: [
-        _tableCell("Ingredientes", isHeader: true),
-        _tableCell("Necessário", isHeader: true),
-        _tableCell("Em estoque", isHeader: true),
-        _tableCell("Faltando", isHeader: true),
-      ],
-    );
-  }
-
-  static TableRow _buildTableRow(
-      String ingrediente, String necessario, String estoque, String faltando) {
-    return TableRow(
-      children: [
-        _tableCell(ingrediente),
-        _tableCell(necessario),
-        _tableCell(estoque),
-        _tableCell(faltando),
-      ],
-    );
-  }
-
-  static Widget _tableCell(String text, {bool isHeader = false}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-          fontSize: 13,
-        ),
-      ),
+          items: items
+              .map(
+                (item) => DropdownMenuItem(
+                  value: item,
+                  child: Text(item),
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
 }
