@@ -14,8 +14,10 @@ import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
-import 'package:front_insumos/screens/recipe_form_page.dart';
-import 'package:front_insumos/screens/recipes_page.dart';
+import 'package:front_insumos/screens/recipe/recipe_bloc/recipe_bloc.dart';
+import 'package:front_insumos/screens/recipe/recipe_bloc/recipe_event.dart';
+import 'package:front_insumos/screens/recipe/recipe_form_page.dart';
+import 'package:front_insumos/screens/recipe/recipes_page.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_bloc.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_event.dart';
 import 'package:front_insumos/screens/stock/stock_bloc/stock_bloc.dart';
@@ -93,7 +95,7 @@ class MyApp extends StatelessWidget {
       routes: [
         GoRoute(
           path: '/login',
-          builder: (context, state) => LoginPage(),
+          builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
           path: '/register',
@@ -174,8 +176,14 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/receitas',
               name: 'receitas',
-              pageBuilder: (ctx, state) =>
-                  NoTransitionPage(child: const RecipesPage()),
+              pageBuilder: (ctx, state) => NoTransitionPage(
+                child: BlocProvider(
+                  create: (context) =>
+                      RecipeBloc(apiService: context.read<ApiService>())
+                        ..add(FetchRecipes()),
+                  child: const RecipesPage(),
+                ),
+              ),
             ),
             GoRoute(
               path: '/receitas/novo',
@@ -203,7 +211,7 @@ class MyApp extends StatelessWidget {
         ),
         colorScheme: ColorScheme.fromSwatch()
             .copyWith(primary: CustomColors.blue, secondary: CustomColors.grey),
-        inputDecorationTheme: InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
           hintStyle: TextStyle(color: Colors.grey),
         ),
