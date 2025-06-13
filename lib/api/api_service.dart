@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:front_insumos/models/item.dart';
+import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
 
 class ApiService {
@@ -78,6 +80,8 @@ class ApiService {
     }
   }
 
+  // 🔹 MOVIMENTS -------------------------------
+
   Future<List<Map<String, dynamic>>> fetchMovements() async {
     try {
       final response = await _dio.get("$baseUrl/movement");
@@ -91,24 +95,71 @@ class ApiService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchStocks() async {
+  // 🔹 STOCK -------------------------------
+
+  Future<List<Stock>> fetchStocks() async {
     try {
       final response = await _dio.get("$baseUrl/stock");
-      if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data);
+      if (response.statusCode == 200 && response.data is List) {
+        return (response.data as List).map((e) => Stock.fromJson(e)).toList();
       }
       return [];
     } catch (e) {
-      print("Erro ao buscar stock: $e");
+      print("Erro ao buscar estoque: $e");
       return [];
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchItems() async {
+  Future<Stock?> createStock(Stock stock) async {
+    try {
+      final response = await _dio.post(
+        "$baseUrl/stock",
+        data: stock.toJson(),
+      );
+      if (response.statusCode == 200) {
+        return Stock.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao criar estoque: $e");
+      return null;
+    }
+  }
+
+  Future<Stock?> updateStock(Stock stock) async {
+    if (stock.id == null) return null;
+    try {
+      final response = await _dio.put(
+        "$baseUrl/stock/${stock.id}",
+        data: stock.toJson(),
+      );
+      if (response.statusCode == 200) {
+        return Stock.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao atualizar estoque: $e");
+      return null;
+    }
+  }
+
+  Future<bool> deleteStock(int id) async {
+    try {
+      final response = await _dio.delete("$baseUrl/stock/$id");
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Erro ao deletar estoque: $e");
+      return false;
+    }
+  }
+
+  // 🔹 ITEMS -------------------------------
+
+  Future<List<Item>> fetchItems() async {
     try {
       final response = await _dio.get("$baseUrl/items");
-      if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data);
+      if (response.statusCode == 200 && response.data is List) {
+        return (response.data as List).map((e) => Item.fromJson(e)).toList();
       }
       return [];
     } catch (e) {
@@ -116,6 +167,34 @@ class ApiService {
       return [];
     }
   }
+
+  Future<Item?> createItem(Item item) async {
+    try {
+      final response = await _dio.post(
+        "$baseUrl/items",
+        data: item.toJson(),
+      );
+      if (response.statusCode == 200) {
+        return Item.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao criar item: $e");
+      return null;
+    }
+  }
+
+  Future<bool> deleteItem(int id) async {
+    try {
+      final response = await _dio.delete("$baseUrl/items/$id");
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Erro ao deletar item: $e");
+      return false;
+    }
+  }
+
+  // 🔹 POP -------------------------------
 
   Future<List<Map<String, dynamic>>> fetchPOP() async {
     try {
@@ -129,6 +208,8 @@ class ApiService {
       return [];
     }
   }
+
+  // 🔹 RECIPES -------------------------------
 
   Future<List<Map<String, dynamic>>> fetchRecipes() async {
     try {

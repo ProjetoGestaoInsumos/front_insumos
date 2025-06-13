@@ -15,7 +15,11 @@ import 'package:front_insumos/screens/home_page.dart';
 import 'package:front_insumos/screens/orders/orders_page.dart';
 import 'package:front_insumos/screens/recipe_form_page.dart';
 import 'package:front_insumos/screens/recipes_page.dart';
-import 'package:front_insumos/screens/stock_page.dart';
+import 'package:front_insumos/screens/stock/item_bloc/item_bloc.dart';
+import 'package:front_insumos/screens/stock/item_bloc/item_event.dart';
+import 'package:front_insumos/screens/stock/stock_bloc/stock_bloc.dart';
+import 'package:front_insumos/screens/stock/stock_bloc/stock_event.dart';
+import 'package:front_insumos/screens/stock/stock_page.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
@@ -126,9 +130,24 @@ class MyApp extends StatelessWidget {
               path: '/estoque',
               name: 'estoque',
               pageBuilder: (ctx, state) => NoTransitionPage(
+                child: MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (context) =>
+                          StockBloc(apiService: context.read<ApiService>())
+                            ..add(LoadStockEvent()),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          ItemBloc(apiService: context.read<ApiService>())
+                            ..add(LoadItemEvent()),
+                    ),
+                  ],
                   child: StockPage(
-                      abrirPop:
-                          state.uri.queryParameters['abrirPop'] == 'true')),
+                    abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
+                  ),
+                ),
+              ),
             ),
             GoRoute(
               path: '/historico',
