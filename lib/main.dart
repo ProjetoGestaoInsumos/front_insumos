@@ -57,6 +57,17 @@ void main() {
                 ItemBloc(apiService: context.read<ApiService>())
                   ..add(LoadItemEvent()),
           ),
+          BlocProvider(
+            create: (context) =>
+                RecipeBloc(apiService: context.read<ApiService>())
+                  ..add(FetchRecipes()),
+            child: const RecipesPage(),
+          ),
+          BlocProvider(
+            create: (context) => POPBloc(apiService: context.read<ApiService>())
+              ..add(LoadPOPs()),
+            child: const HistoryPage(),
+          ),
         ],
         child: const AppWrapper(),
       ),
