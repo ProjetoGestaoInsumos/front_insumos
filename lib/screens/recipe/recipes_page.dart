@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/components/custom_search_field.dart';
-import 'package:front_insumos/screens/recipe_form_page.dart';
+import 'package:front_insumos/screens/recipe/recipe_form_page.dart';
 import 'package:front_insumos/utils/colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:front_insumos/api/api_service.dart';
 
 class RecipesPage extends StatefulWidget {
   const RecipesPage({super.key});
@@ -17,23 +18,40 @@ class _RecipesPageState extends State<RecipesPage> {
   List<dynamic> filteredRecipes = [];
   bool isLoading = true;
   String searchQuery = '';
-  final TextEditingController _searchController =
-      TextEditingController(); // Adicionado para controlar o texto da pesquisa
+  final TextEditingController _searchController = TextEditingController();
+  final ApiService apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
     _fetchRecipes();
-    _searchController.addListener(
-      _onSearchChanged,
-    ); // Adiciona listener para a barra de pesquisa
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged); // Remove listener
-    _searchController.dispose(); // Descarta o controller
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchRecipes() async {
+    setState(() => isLoading = true);
+    try {
+      final data = await apiService.fetchRecipes();
+      setState(() {
+        data.sort((a, b) => a['id'].compareTo(b['id']));
+recipes = data;
+
+        _filterRecipes();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar receitas: $e')),
+      );
+    }
   }
 
   void _onSearchChanged() {
@@ -43,39 +61,58 @@ class _RecipesPageState extends State<RecipesPage> {
     });
   }
 
-  Future<void> _fetchRecipes() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      // final data = await apiService.fetchRecipes();
-      setState(() {
-        // recipes = data;
-        _filterRecipes();
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao carregar receitas: $e')));
+  void _filterRecipes() {
+    if (searchQuery.isEmpty) {
+      filteredRecipes = List.from(recipes);
+    } else {
+      filteredRecipes = recipes
+          .where((recipe) => recipe['name']
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()))
+          .toList();
     }
   }
 
-  void _filterRecipes() {
-    if (searchQuery.isEmpty) {
-      filteredRecipes = recipes;
+  void _updateRecipe(Map<String, dynamic> updatedRecipe) {
+    setState(() {
+      int index = recipes.indexWhere((r) => r['id'] == updatedRecipe['id']);
+      if (index != -1) {
+        recipes[index] = updatedRecipe;
+        _filterRecipes();
+      }
+    });
+  }
+
+  Future<void> _openRecipeForm(Map<String, dynamic> recipe) async {
+    var recipeForEditing = Map<String, dynamic>.from(recipe);
+
+    // Ajustar ingredientes
+    if (recipeForEditing['ingredients'] != null) {
+      recipeForEditing['ingredients'] =
+          (recipeForEditing['ingredients'] as List).map((ing) {
+        return {
+          'item_id': ing['item_id'] ?? 0,
+          'quantity': ing['quantity'] ?? 0,
+        };
+      }).toList();
     } else {
-      filteredRecipes = recipes
-          .where(
-            (recipe) => recipe['name'].toLowerCase().contains(
-                  searchQuery.toLowerCase(),
-                ),
-          )
-          .toList();
+      recipeForEditing['ingredients'] = [];
     }
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RecipeFormPage(
+          recipe: recipeForEditing,
+onRecipeCreated: (updatedRecipe) {
+  _updateRecipe(updatedRecipe.toJson());
+},
+
+        ),
+      ),
+    );
+
+    _fetchRecipes(); // Atualiza após edição
   }
 
   @override
@@ -85,14 +122,14 @@ class _RecipesPageState extends State<RecipesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título "Receitas"
           const SizedBox(height: 24),
           Center(
             child: Text(
               'Receitas',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -100,27 +137,23 @@ class _RecipesPageState extends State<RecipesPage> {
           const SizedBox(height: 8),
           Row(
             children: [
-              // Barra de Pesquisa
-              Align(
-                alignment: Alignment.centerLeft,
-                child: CustomSearchField(
-                  width: 250,
-                  onChanged: (value) {
-                    // lógica de busca
-                  },
-                ),
+              CustomSearchField(
+                width: 250,
+                onChanged: (value) {
+                  _searchController.text = value;
+                  _onSearchChanged();
+                },
               ),
-              Spacer(),
-              // Botão "Adicionar Nova Receita"
+              const Spacer(),
               CustomButton(
                 text: "Adicionar Nova Receita",
                 buttonColor: CustomColors.blue,
                 borderRadius: 10,
                 fontSize: 16,
-                iconData: Icons.add, // Adiciona o ícone de adição
+                iconData: Icons.add,
                 onPressed: () async {
-                  context.push('/receitas/novo');
-                  _fetchRecipes(); // Recarrega a lista após adicionar
+                  await context.push('/receitas/novo');
+                  _fetchRecipes();
                 },
               ),
             ],
@@ -141,67 +174,46 @@ class _RecipesPageState extends State<RecipesPage> {
                     : GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // 3 itens por linha
+                          crossAxisCount: 3,
                           crossAxisSpacing: 20,
                           mainAxisSpacing: 20,
-                          childAspectRatio:
-                              0.8, // Ajuste para o aspecto visual das receitas
+                          childAspectRatio: 0.8,
                         ),
                         itemCount: filteredRecipes.length,
                         itemBuilder: (context, index) {
-                          var recipe = filteredRecipes[index];
+                          final recipe = filteredRecipes[index];
                           return Card(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            elevation: 4, // Adiciona sombra para um efeito 3D
+                            elevation: 4,
                             child: InkWell(
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RecipeFormPage(
-                                      recipe:
-                                          recipe, // Passa a receita para edição
-                                    ),
-                                  ),
-                                );
-                                _fetchRecipes(); // Recarrega a lista após editar
-                              },
+                              onTap: () => _openRecipeForm(recipe),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  // Imagem da Receita
                                   Expanded(
                                     flex: 3,
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(10),
-                                      ),
+                                          top: Radius.circular(10)),
                                       child: recipe['imageUrl'] != null &&
                                               recipe['imageUrl'].isNotEmpty
                                           ? Image.network(
                                               recipe['imageUrl'],
                                               fit: BoxFit.cover,
-                                              errorBuilder: (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) =>
-                                                  Center(
-                                                child: Image.asset(
-                                                  'assets/images/placeholder.png',
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ), // Imagem de placeholder
+                                              errorBuilder: (_, __, ___) =>
+                                                  Image.asset(
+                                                'assets/images/placeholder.jpg',
+                                                fit: BoxFit.cover,
+                                              ),
                                             )
                                           : Image.asset(
-                                              'assets/images/placeholder.png',
+                                              'assets/images/placeholder.jpg',
                                               fit: BoxFit.cover,
-                                            ), // Imagem de placeholder
+                                            ),
                                     ),
                                   ),
-                                  // Detalhes da Receita
                                   Expanded(
                                     flex: 2,
                                     child: Padding(
@@ -211,8 +223,7 @@ class _RecipesPageState extends State<RecipesPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            recipe['name'] ??
-                                                'Receita sem nome',
+                                            recipe['name'] ?? 'Receita sem nome',
                                             style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -232,7 +243,7 @@ class _RecipesPageState extends State<RecipesPage> {
                                               color: Colors.black87,
                                             ),
                                           ),
-                                          const Spacer(), // Ocupa espaço para empurrar o botão para baixo
+                                          const Spacer(),
                                           Align(
                                             alignment: Alignment.bottomRight,
                                             child: CustomButton(
@@ -240,18 +251,8 @@ class _RecipesPageState extends State<RecipesPage> {
                                               buttonColor: CustomColors.blue,
                                               borderRadius: 8,
                                               fontSize: 14,
-                                              onPressed: () async {
-                                                await Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        RecipeFormPage(
-                                                      recipe: recipe,
-                                                    ),
-                                                  ),
-                                                );
-                                                _fetchRecipes();
-                                              },
+                                              onPressed: () =>
+                                                  _openRecipeForm(recipe),
                                             ),
                                           ),
                                         ],
