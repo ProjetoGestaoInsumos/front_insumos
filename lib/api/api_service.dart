@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
+import 'package:front_insumos/models/recipe.dart';
 
 class ApiService {
   final Dio _dio = Dio();
@@ -236,7 +237,7 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> fetchRecipes() async {
     try {
-      final response = await _dio.get("$baseUrl/recipe");
+      final response = await _dio.get("$baseUrl/recipes");
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       }
@@ -246,4 +247,39 @@ class ApiService {
       return [];
     }
   }
+
+  Future<Recipe?> createRecipe(Recipe recipe) async {
+    try {
+      final response = await _dio.post(
+        "$baseUrl/recipes",
+        data: recipe.toJson(),
+      );
+      if (response.statusCode == 200) {
+        return Recipe.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao criar receita: $e");
+      return null;
+    }
+  }
+
+  Future<Recipe?> updateRecipe(Recipe recipe) async {
+    if (recipe.id == null) return null;
+    try {
+      final response = await _dio.put(
+        "$baseUrl/recipes/${recipe.id}",
+        data: recipe.toJson(),
+      );
+      if (response.statusCode == 200) {
+        return Recipe.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao atualizar receita: $e");
+      return null;
+    }
+  }
+
+//FIM DA APISERVICE
 }
