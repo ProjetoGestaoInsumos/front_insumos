@@ -12,7 +12,7 @@ import 'package:front_insumos/screens/auth/register_page.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
-import 'package:front_insumos/screens/home_page.dart';
+import 'package:front_insumos/screens/home/home_page.dart';
 import 'package:front_insumos/screens/orders_page.dart';
 import 'package:front_insumos/screens/recipe_form_page.dart';
 import 'package:front_insumos/screens/recipes_page.dart';
@@ -53,6 +53,12 @@ void main() {
                 ItemBloc(apiService: context.read<ApiService>())
                   ..add(LoadItemEvent()),
           ),
+          BlocProvider(
+                  create: (context) =>
+                      HistoryBloc(apiService: context.read<ApiService>())
+                        ..add(FetchMovements()),
+                  child: const HistoryPage(),
+                ),
         ],
         child: const AppWrapper(),
       ),
