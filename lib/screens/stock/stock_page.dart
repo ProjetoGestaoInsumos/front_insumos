@@ -6,6 +6,7 @@ import 'package:front_insumos/components/custom_search_field.dart';
 import 'package:front_insumos/components/error_page.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/screens/stock/add_stock.dart';
+import 'package:front_insumos/screens/stock/edit_stock.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_bloc.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_event.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_state.dart';
@@ -211,7 +212,18 @@ class _StockPageState extends State<StockPage> {
                   decoration:
                       BoxDecoration(color: Colors.grey.withOpacity(0.1)),
                   children: [
-                    const SizedBox(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.edit,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          showEditDialog(context, stock);
+                        },
+                      ),
+                    ),
                     const SizedBox(),
                     const SizedBox(),
                     const SizedBox(),

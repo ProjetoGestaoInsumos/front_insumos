@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
@@ -8,6 +9,7 @@ import 'package:front_insumos/models/pop_create.dart';
 class ApiService {
   final Dio _dio = Dio();
   final String baseUrl = const String.fromEnvironment('BACKEND_URL');
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   Future<User?> getMe(String token) async {
     try {
@@ -86,7 +88,7 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> fetchMovements() async {
     try {
-      final response = await _dio.get("$baseUrl/movement");
+      final response = await _dio.get("$baseUrl/movements");
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       }
@@ -114,9 +116,20 @@ class ApiService {
 
   Future<Stock?> createStock(Stock stock) async {
     try {
+      // Obter o token de autenticação armazenado
+      String? token = await _secureStorage.read(key: 'jwt');
+      if (token == null) {
+        throw Exception('Usuário não autenticado');
+      }
       final response = await _dio.post(
         "$baseUrl/stock",
         data: stock.toJson(),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token", // Envia o token no cabeçalho
+            "Content-Type": "application/json",
+          },
+        ),
       );
       if (response.statusCode == 200) {
         return Stock.fromJson(response.data);
@@ -131,9 +144,19 @@ class ApiService {
   Future<Stock?> updateStock(Stock stock) async {
     if (stock.id == null) return null;
     try {
+      String? token = await _secureStorage.read(key: 'jwt');
+      if (token == null) {
+        throw Exception('Usuário não autenticado');
+      }
       final response = await _dio.put(
         "$baseUrl/stock/${stock.id}",
         data: stock.toJson(),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token", // Envia o token no cabeçalho
+            "Content-Type": "application/json",
+          },
+        ),
       );
       if (response.statusCode == 200) {
         return Stock.fromJson(response.data);
