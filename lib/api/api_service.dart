@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
+import 'package:front_insumos/models/pop.dart';
 import 'package:front_insumos/models/recipe.dart';
 
 class ApiService {
@@ -220,18 +221,55 @@ class ApiService {
 
   // 🔹 POP -------------------------------
 
-  Future<List<Map<String, dynamic>>> fetchPOP() async {
-    try {
-      final response = await _dio.get("$baseUrl/pop");
-      if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data);
-      }
-      return [];
-    } catch (e) {
-      print("Erro ao buscar pop: $e");
-      return [];
+Future<POP> createPop(POP popData) async {
+  try {
+    final response = await Dio().post(
+      '$baseUrl/pop',
+      data: popData.toJson(),
+    );
+
+    if (response.statusCode == 200) {
+      return POP.fromJson(response.data);
+    } else {
+      throw Exception('Erro ao criar POP: Status ${response.statusCode}');
     }
+  } catch (e) {
+    print("Erro ao criar POP: $e");
+    throw Exception('Erro ao criar POP');
   }
+}
+
+
+Future<List<POP>> fetchPopResponses() async {
+  try {
+    final response = await Dio().get('$baseUrl/pop');
+    
+    if (response.statusCode == 200) {
+      // Mapeia a resposta JSON para uma lista de POP
+      return List<POP>.from(
+        response.data.map((x) => POP.fromJson(x)),
+      );
+    }
+    return [];
+  } catch (e) {
+    print("Erro ao buscar POPs: $e");
+    return [];
+  }
+}
+
+Future<void> updatePopStatus(String baseUrl, int popId, String status) async {
+  try {
+    final response = await Dio().put(
+      '$baseUrl/pop/$popId/status',
+      data: {'status': status},
+    );
+    if (response.statusCode == 200) {
+      print("Status do POP atualizado com sucesso");
+    }
+  } catch (e) {
+    print("Erro ao atualizar status do POP: $e");
+  }
+}
 
   // 🔹 RECIPES -------------------------------
 
