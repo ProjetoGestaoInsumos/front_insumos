@@ -86,7 +86,7 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> fetchMovements() async {
     try {
-      final response = await _dio.get("$baseUrl/movement");
+      final response = await _dio.get("$baseUrl/movements");
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       }
@@ -142,9 +142,19 @@ class ApiService {
   Future<Stock?> updateStock(Stock stock) async {
     if (stock.id == null) return null;
     try {
+      String? token = await _secureStorage.read(key: 'jwt');
+      if (token == null) {
+        throw Exception('Usuário não autenticado');
+      }
       final response = await _dio.put(
         "$baseUrl/stock/${stock.id}",
         data: stock.toJson(),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token", // Envia o token no cabeçalho
+            "Content-Type": "application/json",
+          },
+        ),
       );
       if (response.statusCode == 200) {
         return Stock.fromJson(response.data);
