@@ -4,6 +4,9 @@ import 'package:front_insumos/components/custom_button.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_state.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_bloc.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_event.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_state.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_bloc.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_event.dart';
 import 'package:front_insumos/screens/stock/item_bloc/item_state.dart';
@@ -28,6 +31,7 @@ class _HomePageState extends State<HomePage> {
     context.read<ItemBloc>().add(LoadItemEvent());
     context.read<StockBloc>().add(LoadStockEvent());
     context.read<HistoryBloc>().add(FetchMovements());
+    context.read<POPBloc>().add(LoadPOPs());
   }
 
   @override
@@ -196,24 +200,59 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCardPedidos(BuildContext context) {
-    return BlocBuilder<ItemBloc, ItemState>(
+    return BlocBuilder<POPBloc, POPState>(
       builder: (context, state) {
-        if (state is ItemLoading) {
+        if (state is POPLoading || state is POPInitial) {
           return _buildCardBase(
             title: 'Carregando pedidos...',
-            content: Center(child: CircularProgressIndicator()),
+            content: const Center(child: CircularProgressIndicator()),
             buttonRoute: '/pedidos',
           );
-        } else if (state is ItemLoaded) {
-          // Aqui você pode filtrar os itens de pedidos. Exemplo:
-          final pedidos = state.items; // Ajuste conforme seu modelo de pedido
+        } else if (state is POPLoaded) {
+          final pops = state.allPOPs;
+
+          pops.sort((a, b) => b.date.compareTo(a.date));
+          final ultimos = pops.take(5).toList();
 
           return _buildCardBase(
             title: 'Últimos pedidos feitos',
-            content: ListView(
-              children: pedidos
-                  .map((item) => Text('• ${item.name} - ${item.unit}'))
-                  .toList(),
+            content: ListView.builder(
+              itemCount: ultimos.length,
+              itemBuilder: (context, index) {
+                final pop = ultimos[index];
+                final formattedDate = DateFormat('dd/MM/yyyy').format(pop.date);
+
+                return Card(
+                  elevation: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'POP #${pop.id} - ${pop.recipeName}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        InfoRow(label: 'Solicitante', value: pop.docenteNome),
+                        InfoRow(label: 'Data', value: formattedDate),
+                        InfoRow(
+                            label: 'Alunos', value: pop.nStudents.toString()),
+                        InfoRow(label: 'Curso', value: pop.curso),
+                        Row(
+                          children: [
+                            const Text('Status: ',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            _getStatusIcon(pop.status.name),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             buttonRoute: '/pedidos',
             backgroundColor: CustomColors.blue,
@@ -223,12 +262,25 @@ class _HomePageState extends State<HomePage> {
         } else {
           return _buildCardBase(
             title: 'Erro ao carregar pedidos',
-            content: Center(child: Text('Erro ao carregar pedidos.')),
+            content: const Center(child: Text('Erro ao carregar pedidos.')),
             buttonRoute: '/pedidos',
           );
         }
       },
     );
+  }
+
+  Widget _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pendente':
+        return const Icon(Icons.pending_outlined, color: Colors.orange);
+      case 'cancelado':
+        return const Icon(Icons.close, color: Colors.red);
+      case 'aprovado':
+        return const Icon(Icons.check, color: Colors.green);
+      default:
+        return const Icon(Icons.help_outline, color: Colors.grey);
+    }
   }
 
   Widget _buildCardMovimentacoes(BuildContext context) {

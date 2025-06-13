@@ -204,12 +204,12 @@ onRecipeCreated: (updatedRecipe) {
                                               fit: BoxFit.cover,
                                               errorBuilder: (_, __, ___) =>
                                                   Image.asset(
-                                                'assets/images/placeholder.jpg',
+                                                'assets/images/macarrao.jpg',
                                                 fit: BoxFit.cover,
                                               ),
                                             )
                                           : Image.asset(
-                                              'assets/images/placeholder.jpg',
+                                              'assets/images/macarrao.jpg',
                                               fit: BoxFit.cover,
                                             ),
                                     ),

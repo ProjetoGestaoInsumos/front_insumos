@@ -59,6 +59,12 @@ void main() {
           ),
           BlocProvider(
             create: (context) =>
+                HistoryBloc(apiService: context.read<ApiService>())
+                  ..add(FetchMovements()),
+            child: const HistoryPage(),
+          ),
+          BlocProvider(
+            create: (context) =>
                 RecipeBloc(apiService: context.read<ApiService>())
                   ..add(FetchRecipes()),
             child: const RecipesPage(),
@@ -194,7 +200,8 @@ class MyApp extends StatelessWidget {
               pageBuilder: (ctx, state) => NoTransitionPage(
                 child: BlocProvider<POPBloc>(
                   create: (context) =>
-                      POPBloc(apiService: context.read<ApiService>())..add(LoadPOPs()),
+                      POPBloc(apiService: context.read<ApiService>())
+                        ..add(LoadPOPs()),
                   child: OrdersPage(
                     abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
                   ),
