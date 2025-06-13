@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 class POPBloc extends Bloc<POPEvent, POPState> {
   final ApiService apiService;
 
-  POPBloc(this.apiService) : super(POPInitial()) {
+  POPBloc({required this.apiService}) : super(POPInitial()) {
     on<LoadPOPs>(_onLoadPOPs);
     on<SearchPOPs>(_onSearchPOPs);
     on<ChangePage>(_onChangePage);

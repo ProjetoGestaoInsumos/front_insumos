@@ -13,6 +13,8 @@ import 'package:front_insumos/screens/history/history_bloc/history_bloc.dart';
 import 'package:front_insumos/screens/history/history_bloc/history_event.dart';
 import 'package:front_insumos/screens/history/history_page.dart';
 import 'package:front_insumos/screens/home_page.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_bloc.dart';
+import 'package:front_insumos/screens/orders/orders_bloc/order_event.dart';
 import 'package:front_insumos/screens/orders/orders_page.dart';
 import 'package:front_insumos/screens/recipe/recipe_bloc/recipe_bloc.dart';
 import 'package:front_insumos/screens/recipe/recipe_bloc/recipe_event.dart';
@@ -54,6 +56,17 @@ void main() {
             create: (context) =>
                 ItemBloc(apiService: context.read<ApiService>())
                   ..add(LoadItemEvent()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                RecipeBloc(apiService: context.read<ApiService>())
+                  ..add(FetchRecipes()),
+            child: const RecipesPage(),
+          ),
+          BlocProvider(
+            create: (context) => POPBloc(apiService: context.read<ApiService>())
+              ..add(LoadPOPs()),
+            child: const HistoryPage(),
           ),
         ],
         child: const AppWrapper(),
@@ -157,8 +170,8 @@ class MyApp extends StatelessWidget {
                             ..add(LoadItemEvent()),
                     ),
                   ],
-                child: StockPage(
-                  abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
+                  child: StockPage(
+                    abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
                   ),
                 ),
               ),
@@ -179,8 +192,13 @@ class MyApp extends StatelessWidget {
               path: '/pedidos',
               name: 'pedidos',
               pageBuilder: (ctx, state) => NoTransitionPage(
-                child: OrdersPage(
-                    abrirPop: state.uri.queryParameters['abrirPop'] == 'true'),
+                child: BlocProvider<POPBloc>(
+                  create: (context) =>
+                      POPBloc(apiService: context.read<ApiService>())..add(LoadPOPs()),
+                  child: OrdersPage(
+                    abrirPop: state.uri.queryParameters['abrirPop'] == 'true',
+                  ),
+                ),
               ),
             ),
             GoRoute(
