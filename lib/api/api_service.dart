@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
 import 'package:front_insumos/models/user.dart';
@@ -6,6 +7,7 @@ import 'package:front_insumos/models/user.dart';
 class ApiService {
   final Dio _dio = Dio();
   final String baseUrl = const String.fromEnvironment('BACKEND_URL');
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   Future<User?> getMe(String token) async {
     try {
@@ -112,9 +114,20 @@ class ApiService {
 
   Future<Stock?> createStock(Stock stock) async {
     try {
+      // Obter o token de autenticação armazenado
+      String? token = await _secureStorage.read(key: 'jwt');
+      if (token == null) {
+        throw Exception('Usuário não autenticado');
+      }
       final response = await _dio.post(
         "$baseUrl/stock",
         data: stock.toJson(),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token", // Envia o token no cabeçalho
+            "Content-Type": "application/json",
+          },
+        ),
       );
       if (response.statusCode == 200) {
         return Stock.fromJson(response.data);

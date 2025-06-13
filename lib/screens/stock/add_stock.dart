@@ -4,6 +4,8 @@ import 'package:front_insumos/components/custom_popup.dart';
 import 'package:front_insumos/models/enums.dart';
 import 'package:front_insumos/models/item.dart';
 import 'package:front_insumos/models/stock.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
+import 'package:front_insumos/screens/auth/auth_bloc/auth_state.dart';
 import 'package:front_insumos/screens/stock/stock_bloc/stock_bloc.dart';
 import 'package:front_insumos/screens/stock/stock_bloc/stock_event.dart';
 import 'package:front_insumos/utils/colors.dart'; // Importando o modelo de Item
@@ -16,6 +18,16 @@ Future<void> showAddStockDialog(
   double quantity = 0;
   DateTime selectedDate = DateTime.now();
   Unit? itemUnit = allItems.isNotEmpty ? allItems[0].unit : null;
+
+  final authState = context.read<AuthBloc>().state;
+
+  if (authState is AuthUnauthenticated) {
+    // Se o usuário não estiver autenticado, exiba uma mensagem
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Você precisa estar autenticado para adicionar estoque.')),
+    );
+    return;
+  }
 
   await CustomPopup.show(
     context: context,

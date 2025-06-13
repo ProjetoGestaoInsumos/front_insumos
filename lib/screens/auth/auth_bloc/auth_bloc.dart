@@ -7,9 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ApiService apiService;
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final FlutterSecureStorage secureStorage;
 
-  AuthBloc({required this.apiService}) : super(AuthInitial()) {
+  AuthBloc({required this.apiService, required this.secureStorage})
+      : super(AuthInitial()) {
     on<CheckAuthEvent>(_onCheckAuth);
     on<LoginEvent>(_onLogin);
     on<LogoutEvent>(_onLogout);

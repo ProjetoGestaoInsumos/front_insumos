@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_insumos/api/api_service.dart';
 import 'package:front_insumos/layouts/main_layout.dart';
 import 'package:front_insumos/screens/auth/auth_bloc/auth_bloc.dart';
@@ -37,9 +38,10 @@ void main() {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) =>
-                AuthBloc(apiService: context.read<ApiService>())
-                  ..add(CheckAuthEvent()),
+            create: (context) => AuthBloc(
+                apiService: context.read<ApiService>(),
+                secureStorage: FlutterSecureStorage())
+              ..add(CheckAuthEvent()),
           ),
         ],
         child: const AppWrapper(),
